@@ -1,0 +1,94 @@
+@keyframes seta-pisca { 50% { opacity: 0; } }
+
+@keyframes pulso { 50% { box-shadow: 0 0 0 2px var(--cor-tier); } }
+
+@keyframes brilho-ouro {
+  0%, 100% { box-shadow: 0 0 0 1px var(--tier-lendario); color: var(--tier-lendario); }
+  50% { box-shadow: 0 0 0 3px #fff3a3; color: #fff3a3; }
+}
+
+@keyframes shimmer { from { background-position: 150% 0; } to { background-position: -150% 0; } }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.anim-shake { animation: shake .4s steps(5); }
+
+@keyframes flutuar { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+
+@keyframes subir-fade { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.anim-entrada { animation: subir-fade .5s steps(6) both; }
+
+@keyframes flash-open {
+  0% { opacity: 0; }
+  30% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes bola-cai {
+  0% { transform: translate(-50%, 0) rotate(0); }
+  70% { transform: translate(-50%, 120px) rotate(360deg); }
+  85% { transform: translate(-50%, 104px) rotate(380deg); }
+  100% { transform: translate(-50%, 120px) rotate(360deg); }
+}
+
+@keyframes bola-balanca {
+  0%, 100% { transform: translate(-50%, 120px) rotate(0); }
+  25% { transform: translate(-50%, 120px) rotate(-18deg); }
+  75% { transform: translate(-50%, 120px) rotate(18deg); }
+}
+
+@keyframes tremer-leve { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(1px, -1px); } }
+
+/* Efeitos de batalha */
+@keyframes flash-dano { 0%, 100% { filter: none; } 25%, 75% { filter: brightness(2.5) saturate(0); } 50% { filter: none; } }
+.fx-dano { animation: flash-dano .45s steps(4); }
+
+@keyframes flash-super { 0%, 100% { background: transparent; } 50% { background: rgba(228,59,68,.45); } }
+.fx-super::before { content: ''; position: absolute; inset: 0; animation: flash-super .5s steps(3) 2; pointer-events: none; z-index: 2; }
+
+@keyframes flash-fraco { 0%, 100% { background: transparent; } 50% { background: rgba(0,149,233,.3); } }
+.fx-fraco::before { content: ''; position: absolute; inset: 0; animation: flash-fraco .5s steps(3); pointer-events: none; z-index: 2; }
+
+@keyframes escudo { 0% { transform: scale(.4); opacity: 0; } 30% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); opacity: 0; } }
+.escudo {
+  position: absolute; inset: 6px;
+  border: 4px solid #8fd3ff;
+  background: rgba(143,211,255,.15);
+  clip-path: polygon(50% 0, 100% 15%, 100% 60%, 50% 100%, 0 60%, 0 15%);
+  animation: escudo 1s steps(8) forwards;
+  pointer-events: none;
+  z-index: 3;
+}
+
+@keyframes desmaio { to { transform: translateY(30px); opacity: .25; filter: grayscale(1); } }
+.fx-desmaio .sprite-batalha { animation: desmaio .6s steps(6) forwards; }
+
+@keyframes entrar-campo { from { transform: scale(0); filter: brightness(4); } to { transform: none; filter: none; } }
+.fx-entrada .sprite-batalha { animation: entrar-campo .45s steps(5); }
+
+@keyframes ataque-frente { 50% { transform: translateX(14px); } }
+@keyframes ataque-tras   { 50% { transform: translateX(-14px); } }
+.fx-ataca.lado-jogador .sprite-batalha { animation: ataque-frente .3s steps(3); }
+.fx-ataca.lado-rival .sprite-batalha   { animation: ataque-tras .3s steps(3); }
+
+/* Confete de vitória */
+@keyframes cair { to { transform: translateY(110vh) rotate(720deg); } }
+.confete {
+  position: fixed; top: -12px;
+  width: 8px; height: 8px;
+  pointer-events: none;
+  z-index: 60;
+  animation: cair linear forwards;
+}
+
+@keyframes escurecer { to { background: rgba(0,0,0,.65); } }
+.tela-escura { position: fixed; inset: 0; pointer-events: none; z-index: 30; animation: escurecer 1.2s steps(6) forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

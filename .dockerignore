@@ -1,0 +1,7 @@
+.git
+.idea
+.vscode
+*.test
+*.out
+bin/
+web/

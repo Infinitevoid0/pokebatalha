@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package jogadores.v1;
+
+option go_package = "pokebatalha/gen/jogadores/v1;jogadoresv1";
+
+// Jogadores é o serviço dono das contas, do saldo de moedas e da coleção.
+service Jogadores {
+  // ValidarTime confere se o jogador possui todos os Pokémon do time.
+  // Erros: NOT_FOUND (jogador não existe), FAILED_PRECONDITION (não possui algum Pokémon).
+  rpc ValidarTime(ValidarTimeRequest) returns (ValidarTimeResponse);
+
+  // CreditarMoedas soma moedas ao saldo (recompensa de batalha).
+  rpc CreditarMoedas(CreditarMoedasRequest) returns (CreditarMoedasResponse);
+}
+
+message ValidarTimeRequest {
+  int64 jogador_id = 1;
+  repeated int32 pokemon_ids = 2;
+}
+
+message ValidarTimeResponse {}
+
+message CreditarMoedasRequest {
+  int64 jogador_id = 1;
+  int32 quantidade = 2;
+}
+
+message CreditarMoedasResponse {
+  int32 saldo = 1;
+}

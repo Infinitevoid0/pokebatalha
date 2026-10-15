@@ -1,0 +1,86 @@
+:root {
+  /* --- Backgrounds --- */
+  --bg-primary:    #1a1c2c;
+  --bg-secondary:  #262b44;
+  --bg-surface:    #333c57;
+  --bg-dialog:     #f4f4f4;
+  --bg-deep:       #0d0f18;
+
+  /* --- Texto --- */
+  --text-primary:   #f2f2f2;
+  --text-secondary: #a0a8c0;
+  --text-dialog:    #1a1c2c;
+
+  /* --- Destaques --- */
+  --accent-red:    #e43b44;
+  --accent-green:  #3e8948;
+  --accent-yellow: #feae34;
+  --accent-blue:   #0095e9;
+  --accent-purple: #b55088;
+  --accent-gold:   #f7d51d;
+
+  /* --- HP --- */
+  --hp-alto:  #63c74d;
+  --hp-medio: #feae34;
+  --hp-baixo: #e43b44;
+
+  /* --- Tipos Pokémon --- */
+  --type-normal:   #a8a878;
+  --type-fire:     #f08030;
+  --type-water:    #6890f0;
+  --type-electric: #f8d030;
+  --type-grass:    #78c850;
+  --type-ice:      #98d8d8;
+  --type-fighting: #c03028;
+  --type-poison:   #a040a0;
+  --type-ground:   #e0c068;
+  --type-flying:   #a890f0;
+  --type-psychic:  #f85888;
+  --type-bug:      #a8b820;
+  --type-rock:     #b8a038;
+  --type-ghost:    #705898;
+  --type-dragon:   #7038f8;
+  --type-dark:     #705848;
+  --type-steel:    #b8b8d0;
+  --type-fairy:    #ee99ac;
+
+  /* --- Tiers --- */
+  --tier-comum:    #a0a8c0;
+  --tier-raro:     #6890f0;
+  --tier-epico:    #b55088;
+  --tier-lendario: #f7d51d;
+
+  /* --- Fontes --- */
+  --font-pixel: 'Press Start 2P', ui-monospace, monospace;
+  --font-title: 'Silkscreen', ui-monospace, monospace;
+
+  /* --- Espaçamentos (grade de 4px) --- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+
+  /* --- Bordas e sombras pixel --- */
+  --border-pixel: 3px solid #f2f2f2;
+  --border-dark:  3px solid #1a1c2c;
+  --shadow-pixel: 4px 4px 0 var(--bg-deep);
+
+  --fs-xs: 8px;
+  --fs-sm: 10px;
+  --fs-md: 12px;
+  --fs-lg: 14px;
+}
+
+@media (max-width: 599px) {
+  :root { --fs-xs: 7px; --fs-sm: 9px; --fs-md: 10px; --fs-lg: 12px; }
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-pixel);
+  font-size: var(--fs-sm);
+  image-rendering: pixelated;
+}

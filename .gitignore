@@ -1,0 +1,10 @@
+# binários e saídas de teste
+bin/
+*.exe
+*.test
+*.out
+# editores e sistema
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

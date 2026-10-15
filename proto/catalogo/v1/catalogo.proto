@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package catalogo.v1;
+
+option go_package = "pokebatalha/gen/catalogo/v1;catalogov1";
+
+// Catalogo é o serviço dono dos dados de Pokémon (vindos da PokeAPI)
+// e do índice de poder que define o tier de cada um.
+service Catalogo {
+  // BuscarPokemon devolve um Pokémon pelo ID da PokeAPI.
+  // Erros: NOT_FOUND (não existe), INVALID_ARGUMENT, UNAVAILABLE (PokeAPI fora).
+  rpc BuscarPokemon(BuscarPokemonRequest) returns (Pokemon);
+
+  // BuscarPokemons devolve vários Pokémon de uma vez (até 50).
+  rpc BuscarPokemons(BuscarPokemonsRequest) returns (BuscarPokemonsResponse);
+
+  // SortearPokemon devolve um Pokémon aleatório do tier pedido. Com
+  // poder_referencia > 0, sorteia entre os de poder mais próximo.
+  // Erros: INVALID_ARGUMENT, UNAVAILABLE (PokeAPI fora ou cache ainda carregando).
+  rpc SortearPokemon(SortearPokemonRequest) returns (Pokemon);
+
+  // TabelaDeTipos devolve as relações de dano entre os 18 tipos.
+  rpc TabelaDeTipos(TabelaDeTiposRequest) returns (TabelaDeTiposResponse);
+}
+
+message BuscarPokemonRequest {
+  int32 id = 1;
+}
+
+message BuscarPokemonsRequest {
+  repeated int32 ids = 1;
+}
+
+message BuscarPokemonsResponse {
+  repeated Pokemon pokemons = 1;
+}
+
+message SortearPokemonRequest {
+  // "comum", "raro", "epico" ou "lendario".
+  string tier = 1;
+  int32 poder_referencia = 2;
+}
+
+message Status {
+  int32 hp = 1;
+  int32 ataque = 2;
+  int32 defesa = 3;
+  int32 ataque_especial = 4;
+  int32 defesa_especial = 5;
+  int32 velocidade = 6;
+}
+
+// Poder é o índice de força, com a conta aberta.
+message Poder {
+  int32 total = 1;
+  int32 stats = 2;
+  int32 tipagem_ofensiva = 3;
+  int32 tipagem_defensiva = 4;
+  int32 habilidade = 5;
+  int32 fake_out = 6;
+  string habilidade_ativa = 7;
+}
+
+message Pokemon {
+  int32 id = 1;
+  string nome = 2;
+  repeated string tipos = 3;
+  repeated string habilidades = 4;
+  bool aprende_fake_out = 5;
+  Status status = 6;
+  string tier = 7;
+  Poder poder = 8;
+}
+
+message TabelaDeTiposRequest {}
+
+message RelacaoTipo {
+  string tipo = 1;
+  repeated string dobro_para = 2;
+  repeated string metade_para = 3;
+  repeated string nenhum_para = 4;
+}
+
+message TabelaDeTiposResponse {
+  repeated RelacaoTipo relacoes = 1;
+}
