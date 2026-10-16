@@ -1,5 +1,4 @@
-// Estado global em memória, com um pub/sub simples. Só o ID do jogador
-// vai para o localStorage (para lembrar a conta na próxima visita).
+// estado global com pub/sub; só o ID do jogador vai para o localStorage.
 
 const CHAVE_ID = 'pokebatalha.jogador_id';
 
@@ -10,12 +9,12 @@ function gravarStorage(valor) {
   try {
     if (valor == null) localStorage.removeItem(CHAVE_ID);
     else localStorage.setItem(CHAVE_ID, String(valor));
-  } catch { /* modo privado ou storage bloqueado: segue sem lembrar */ }
+  } catch { /* storage bloqueado: segue sem lembrar */ }
 }
 
 export const Estado = {
   jogador: null,   // { id, nome, moedas, pity }
-  colecao: null,   // resposta de /colecao (cache até abrir pacote)
+  colecao: null,   // cache de /colecao até abrir pacote
   batalha: null,   // batalha em andamento
   time: [],        // IDs escolhidos na seleção de time
 

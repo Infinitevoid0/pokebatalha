@@ -1,5 +1,4 @@
-// Package execucao sobe os servidores HTTP e gRPC de um serviço e faz o
-// desligamento gracioso quando o processo recebe SIGINT/SIGTERM.
+// sobe HTTP e gRPC e desliga com calma no SIGINT/SIGTERM.
 package execucao
 
 import (
@@ -16,8 +15,7 @@ import (
 
 const tempoDesligamento = 10 * time.Second
 
-// Rodar bloqueia até ctx ser cancelado ou um dos servidores falhar.
-// grpcSrv pode ser nil para serviços que só expõem HTTP.
+// bloqueia até o ctx cancelar ou um servidor falhar; grpcSrv pode ser nil.
 func Rodar(ctx context.Context, log *slog.Logger, httpSrv *http.Server, grpcSrv *grpc.Server, enderecoGRPC string) error {
 	erros := make(chan error, 2)
 

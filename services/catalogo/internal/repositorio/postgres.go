@@ -1,4 +1,4 @@
-// Package repositorio isola o acesso ao banco do catálogo.
+// acesso ao banco do catálogo.
 package repositorio
 
 import (
@@ -16,17 +16,16 @@ import (
 //go:embed schema.sql
 var schema string
 
-// Postgres guarda o cache de Pokémon e tipos.
+// cache de Pokémon e tipos.
 type Postgres struct {
 	pool *pgxpool.Pool
 }
 
-// NovoPostgres cria o repositório sobre um pool já conectado.
 func NovoPostgres(pool *pgxpool.Pool) *Postgres {
 	return &Postgres{pool: pool}
 }
 
-// Migrar cria as tabelas, se ainda não existirem.
+// cria as tabelas se não existirem.
 func (r *Postgres) Migrar(ctx context.Context) error {
 	if _, err := r.pool.Exec(ctx, schema); err != nil {
 		return fmt.Errorf("criar tabelas do catálogo: %w", err)
@@ -37,13 +36,13 @@ func (r *Postgres) Migrar(ctx context.Context) error {
 const colunasPokemon = `id, nome, tipos, habilidades, aprende_fake_out,
 	hp, ataque, defesa, ataque_especial, defesa_especial, velocidade`
 
-// BuscarPokemonPorID devolve dominio.ErrForaDoCache se o ID não estiver salvo.
+// devolve ErrForaDoCache se o ID não estiver salvo.
 func (r *Postgres) BuscarPokemonPorID(ctx context.Context, id int) (dominio.Pokemon, error) {
 	linha := r.pool.QueryRow(ctx, `SELECT `+colunasPokemon+` FROM pokemons WHERE id = $1`, id)
 	return escanearPokemon(linha)
 }
 
-// BuscarPokemonPorNome devolve dominio.ErrForaDoCache se o nome não estiver salvo.
+// devolve ErrForaDoCache se o nome não estiver salvo.
 func (r *Postgres) BuscarPokemonPorNome(ctx context.Context, nome string) (dominio.Pokemon, error) {
 	linha := r.pool.QueryRow(ctx, `SELECT `+colunasPokemon+` FROM pokemons WHERE nome = $1`, nome)
 	return escanearPokemon(linha)
@@ -63,7 +62,7 @@ func escanearPokemon(linha pgx.Row) (dominio.Pokemon, error) {
 	return p, nil
 }
 
-// ListarPokemons devolve todo o cache (no máximo ~1025 linhas pequenas).
+// todo o cache (~1025 linhas pequenas).
 func (r *Postgres) ListarPokemons(ctx context.Context) ([]dominio.Pokemon, error) {
 	linhas, err := r.pool.Query(ctx, `SELECT `+colunasPokemon+` FROM pokemons ORDER BY id`)
 	if err != nil {
@@ -85,7 +84,7 @@ func (r *Postgres) ListarPokemons(ctx context.Context) ([]dominio.Pokemon, error
 	return todos, nil
 }
 
-// SalvarPokemon insere ou atualiza o Pokémon no cache.
+// insere ou atualiza no cache.
 func (r *Postgres) SalvarPokemon(ctx context.Context, p dominio.Pokemon) error {
 	_, err := r.pool.Exec(ctx, `
 		INSERT INTO pokemons (`+colunasPokemon+`)
@@ -105,7 +104,7 @@ func (r *Postgres) SalvarPokemon(ctx context.Context, p dominio.Pokemon) error {
 	return nil
 }
 
-// BuscarTipo devolve dominio.ErrForaDoCache se o tipo não estiver salvo.
+// devolve ErrForaDoCache se o tipo não estiver salvo.
 func (r *Postgres) BuscarTipo(ctx context.Context, nome string) (dominio.RelacaoTipo, error) {
 	t := dominio.RelacaoTipo{Tipo: nome}
 	err := r.pool.QueryRow(ctx,
@@ -120,7 +119,7 @@ func (r *Postgres) BuscarTipo(ctx context.Context, nome string) (dominio.Relacao
 	return t, nil
 }
 
-// SalvarTipo insere ou atualiza as relações de um tipo.
+// insere ou atualiza as relações de um tipo.
 func (r *Postgres) SalvarTipo(ctx context.Context, t dominio.RelacaoTipo) error {
 	_, err := r.pool.Exec(ctx, `
 		INSERT INTO tipos (nome, dobro_para, metade_para, nenhum_para)

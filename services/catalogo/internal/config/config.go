@@ -1,4 +1,4 @@
-// Package config carrega a configuração do catálogo a partir do ambiente.
+// configuração do catálogo via ambiente.
 package config
 
 import (
@@ -7,7 +7,6 @@ import (
 	"pokebatalha/pkg/config"
 )
 
-// Config reúne tudo que o serviço lê do ambiente.
 type Config struct {
 	PortaHTTP      string
 	PortaGRPC      string
@@ -17,7 +16,6 @@ type Config struct {
 	AquecerCache   bool
 }
 
-// Carregar lê as variáveis de ambiente.
 func Carregar() (Config, error) {
 	dbURL, err := config.Obrigatorio("DATABASE_URL")
 	if err != nil {

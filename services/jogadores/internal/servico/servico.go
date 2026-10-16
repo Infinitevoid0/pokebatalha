@@ -1,5 +1,4 @@
-// Package servico contém as regras de negócio de jogadores: criar conta,
-// abrir pacotes (gacha), validar time e creditar recompensas.
+// regras de jogadores: conta, gacha, validar time e creditar recompensa.
 package servico
 
 import (
@@ -11,7 +10,7 @@ import (
 	"pokebatalha/services/jogadores/internal/dominio"
 )
 
-// Repositorio é o banco de jogadores (implementado em repositorio.Postgres).
+// banco de jogadores (implementado em repositorio.Postgres).
 type Repositorio interface {
 	Criar(ctx context.Context, nome string, moedas int) (dominio.Jogador, error)
 	BuscarPorID(ctx context.Context, id int64) (dominio.Jogador, error)
@@ -21,19 +20,18 @@ type Repositorio interface {
 	PokemonsFaltando(ctx context.Context, jogadorID int64, pokemonIDs []int) ([]int, error)
 }
 
-// Catalogo é o outro microsserviço (implementado em catalogo.Cliente, via gRPC).
+// catálogo via gRPC (implementado em catalogo.Cliente).
 type Catalogo interface {
 	SortearPokemon(ctx context.Context, tier string) (dominio.PokemonSorteado, error)
 	BuscarDetalhes(ctx context.Context, ids []int) (map[int]dominio.Detalhes, error)
 }
 
-// Regras são os valores de economia do jogo, vindos da configuração.
+// valores de economia, vindos da config.
 type Regras struct {
 	MoedasIniciais int
 	PrecoPacote    int
 }
 
-// Servico é o caso de uso de jogadores.
 type Servico struct {
 	repo     Repositorio
 	catalogo Catalogo
@@ -41,12 +39,11 @@ type Servico struct {
 	regras   Regras
 }
 
-// Novo monta o serviço com suas dependências.
 func Novo(repo Repositorio, cat Catalogo, s dominio.Sorteador, regras Regras) *Servico {
 	return &Servico{repo: repo, catalogo: cat, sorteio: s, regras: regras}
 }
 
-// CriarJogador cria a conta com o saldo inicial.
+// cria a conta com o saldo inicial.
 func (s *Servico) CriarJogador(ctx context.Context, nome string) (dominio.Jogador, error) {
 	nome, err := dominio.NormalizarNome(nome)
 	if err != nil {
@@ -55,19 +52,19 @@ func (s *Servico) CriarJogador(ctx context.Context, nome string) (dominio.Jogado
 	return s.repo.Criar(ctx, nome, s.regras.MoedasIniciais)
 }
 
-// BuscarJogador devolve a conta pelo ID.
+// busca a conta pelo ID.
 func (s *Servico) BuscarJogador(ctx context.Context, id int64) (dominio.Jogador, error) {
 	return s.repo.BuscarPorID(ctx, id)
 }
 
-// Colecao é a coleção do jogador com os dados atuais de cada Pokémon.
+// coleção com os dados atuais de cada Pokémon.
 type Colecao struct {
 	Pokemons []dominio.ItemColecao `json:"pokemons"`
-	// Se o catálogo estiver fora, a coleção vem sem stats em vez de falhar.
+	// catálogo fora: a coleção vem sem stats em vez de falhar.
 	DetalhesIndisponiveis bool `json:"detalhes_indisponiveis,omitempty"`
 }
 
-// Colecao lista os Pokémon do jogador, do mais forte ao mais fraco.
+// lista do mais forte ao mais fraco.
 func (s *Servico) Colecao(ctx context.Context, id int64) (Colecao, error) {
 	if _, err := s.repo.BuscarPorID(ctx, id); err != nil {
 		return Colecao{}, err
@@ -110,7 +107,7 @@ func poderDe(it dominio.ItemColecao) int {
 	return it.Detalhes.Poder.Total
 }
 
-// ResultadoPacote é o que o jogador recebe ao abrir um pacote.
+// o que o jogador recebe ao abrir um pacote.
 type ResultadoPacote struct {
 	Pokemon   dominio.ItemColecao `json:"pokemon"`
 	Saldo     int                 `json:"saldo"`
@@ -118,14 +115,14 @@ type ResultadoPacote struct {
 	Pity      dominio.InfoPity    `json:"pity"`
 }
 
-// AbrirPacote cobra o preço, sorteia o tier e pede ao catálogo um Pokémon dele.
+// cobra, sorteia o tier e pede ao catálogo um Pokémon dele.
 func (s *Servico) AbrirPacote(ctx context.Context, id int64) (ResultadoPacote, error) {
 	j, err := s.repo.BuscarPorID(ctx, id)
 	if err != nil {
 		return ResultadoPacote{}, err
 	}
-	// Checagem antecipada para não gastar uma chamada ao catálogo à toa.
-	// A garantia de verdade fica no UPDATE condicional do repositório.
+	// checagem antecipada para não chamar o catálogo à toa;
+	// a garantia real é o UPDATE condicional do repositório.
 	if j.Moedas < s.regras.PrecoPacote {
 		return ResultadoPacote{}, fmt.Errorf("%w: pacote custa %d, você tem %d",
 			dominio.ErrSaldoInsuficiente, s.regras.PrecoPacote, j.Moedas)
@@ -144,7 +141,7 @@ func (s *Servico) AbrirPacote(ctx context.Context, id int64) (ResultadoPacote, e
 	return ResultadoPacote{Pokemon: item, Saldo: saldo, Garantido: sorteio.Garantido, Pity: sorteio.Pity.Info()}, nil
 }
 
-// ValidarTime confere se o jogador possui todos os Pokémon do time.
+// confere se o jogador tem todos os Pokémon do time.
 func (s *Servico) ValidarTime(ctx context.Context, id int64, pokemonIDs []int) error {
 	if len(pokemonIDs) == 0 {
 		return fmt.Errorf("%w: o time está vazio", dominio.ErrTimeInvalido)
@@ -162,7 +159,7 @@ func (s *Servico) ValidarTime(ctx context.Context, id int64, pokemonIDs []int) e
 	return nil
 }
 
-// CreditarMoedas soma a recompensa ao saldo do jogador.
+// soma a recompensa ao saldo.
 func (s *Servico) CreditarMoedas(ctx context.Context, id int64, quantidade int) (int, error) {
 	if quantidade <= 0 {
 		return 0, fmt.Errorf("%w: %d", dominio.ErrQuantidadeInvalida, quantidade)

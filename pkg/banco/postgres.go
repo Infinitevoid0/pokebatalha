@@ -1,5 +1,4 @@
-// Package banco abre o pool de conexões com o Postgres, tentando de novo
-// enquanto o banco ainda está subindo (comum no docker compose).
+// pool do Postgres, com retry enquanto o banco sobe.
 package banco
 
 import (
@@ -16,7 +15,7 @@ const (
 	esperaEntreElas = 2 * time.Second
 )
 
-// Conectar cria o pool e só retorna quando o banco responder ao ping.
+// só retorna quando o banco responder ao ping.
 func Conectar(ctx context.Context, url string, log *slog.Logger) (*pgxpool.Pool, error) {
 	pool, err := pgxpool.New(ctx, url)
 	if err != nil {

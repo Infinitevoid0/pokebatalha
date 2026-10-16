@@ -2,7 +2,7 @@ package dominio
 
 import "testing"
 
-// tabelaReal tem a tabela de tipos completa, para os números baterem com o jogo.
+// tabela de tipos completa, para os números baterem com o jogo.
 func tabelaReal() Tabela {
 	rel := func(tipo string, dobro, metade, nenhum []string) RelacaoTipo {
 		return RelacaoTipo{Tipo: tipo, DobroPara: dobro, MetadePara: metade, NenhumPara: nenhum}
@@ -44,7 +44,7 @@ var (
 )
 
 func TestCalcularPoder_BateComACalibracao(t *testing.T) {
-	// Valores conferidos com o script de calibração sobre os CSVs da PokeAPI.
+	// valores conferidos com a calibração sobre os CSVs da PokeAPI.
 	p := CalcularPoder(incineroar, tabelaReal())
 	esperado := Poder{Total: 465, Stats: 360, Ofensivo: 40, Defensivo: 0, Habilidade: 45, FakeOut: 20, HabilidadeAtiva: "intimidate"}
 	if p != esperado {
@@ -56,8 +56,8 @@ func TestCalcularPoder_BateComACalibracao(t *testing.T) {
 }
 
 func TestMecanicaPesaMaisQueStatsBrutos(t *testing.T) {
-	// O exemplo do jogo: o Charizard tem stats maiores (368 x 360),
-	// mas Intimidate, Fake Out e a tipagem colocam o Incineroar um tier acima.
+	// o Charizard tem mais stats (368 x 360), mas Intimidate, Fake Out
+	// e a tipagem põem o Incineroar um tier acima.
 	inc, cha := CalcularPoder(incineroar, tabelaReal()), CalcularPoder(charizard, tabelaReal())
 	if cha.Stats <= inc.Stats {
 		t.Fatal("o exemplo pressupõe charizard com stats maiores")
@@ -70,7 +70,7 @@ func TestMecanicaPesaMaisQueStatsBrutos(t *testing.T) {
 
 func TestTipagemDefensiva_ImunidadesValem(t *testing.T) {
 	tabela := tabelaReal()
-	// Fantasma/Fada é imune a Normal, Lutador e Dragão; Gelo puro é fraco a muita coisa.
+	// fantasma/fada é imune a normal, lutador e dragão; gelo puro é fraco a muita coisa.
 	if fantasmaFada, gelo := tipagemDefensiva([]string{"ghost", "fairy"}, tabela), tipagemDefensiva([]string{"ice"}, tabela); fantasmaFada <= gelo {
 		t.Errorf("ghost/fairy (%d) deveria defender melhor que ice (%d)", fantasmaFada, gelo)
 	}

@@ -1,5 +1,4 @@
-// Barra de HP: verde acima de 50%, amarela de 25% a 50%, vermelha abaixo.
-// Anima com transform: scaleX (não mexe no layout).
+// barra de HP: verde > 50%, amarela até 25%, vermelha abaixo; anima com scaleX.
 
 function corHP(fracao) {
   if (fracao > 0.5) return 'var(--hp-alto)';

@@ -1,6 +1,5 @@
--- Banco próprio do serviço de batalha (batalha_db).
--- O estado da partida é guardado como JSONB; "versao" evita que dois
--- turnos enviados ao mesmo tempo sobrescrevam um ao outro.
+-- batalha_db: estado da partida em JSONB; "versao" impede que dois turnos
+-- simultâneos se sobrescrevam.
 CREATE TABLE IF NOT EXISTS batalhas (
     id            BIGSERIAL PRIMARY KEY,
     jogador_id    BIGINT NOT NULL,

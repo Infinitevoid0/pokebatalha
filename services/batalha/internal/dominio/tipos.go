@@ -5,12 +5,12 @@ import (
 	"strings"
 )
 
-// TabelaTipos responde quanto um tipo de ataque causa contra um defensor.
+// multiplicador de um tipo de ataque contra o defensor.
 type TabelaTipos interface {
 	Multiplicador(ataque string, tiposDefensor []string) float64
 }
 
-// RelacaoTipo é o que o catálogo envia sobre cada tipo atacante.
+// dados de um tipo atacante vindos do catálogo.
 type RelacaoTipo struct {
 	Tipo       string
 	DobroPara  []string
@@ -18,10 +18,10 @@ type RelacaoTipo struct {
 	NenhumPara []string
 }
 
-// Tabela implementa TabelaTipos a partir das relações vindas do catálogo.
+// implementa TabelaTipos com as relações do catálogo.
 type Tabela map[string]RelacaoTipo
 
-// NovaTabela indexa as relações pelo nome do tipo atacante.
+// indexa as relações pelo tipo atacante.
 func NovaTabela(relacoes []RelacaoTipo) Tabela {
 	t := make(Tabela, len(relacoes))
 	for _, r := range relacoes {
@@ -30,7 +30,7 @@ func NovaTabela(relacoes []RelacaoTipo) Tabela {
 	return t
 }
 
-// Multiplicador devolve 0, 0.25, 0.5, 1, 2 ou 4.
+// 0, 0.25, 0.5, 1, 2 ou 4.
 func (t Tabela) Multiplicador(ataque string, tiposDefensor []string) float64 {
 	rel, ok := t[ataque]
 	if !ok {
@@ -58,7 +58,7 @@ var nomesTipos = map[string]string{
 	"steel": "Aço", "fairy": "Fada",
 }
 
-// NomeTipo traduz o tipo da PokeAPI para português.
+// tipo da PokeAPI em português.
 func NomeTipo(tipo string) string {
 	if n, ok := nomesTipos[tipo]; ok {
 		return n
@@ -66,7 +66,7 @@ func NomeTipo(tipo string) string {
 	return tipo
 }
 
-// Exibir transforma "flutter-mane" em "Flutter Mane".
+// "flutter-mane" -> "Flutter Mane".
 func Exibir(nome string) string {
 	partes := strings.Split(nome, "-")
 	for i, p := range partes {

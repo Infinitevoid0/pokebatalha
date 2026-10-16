@@ -52,7 +52,7 @@ export async function renderGacha(app) {
     atualizarBotao();
     btnVoltar.disabled = true;
 
-    // Fase 1 -> 2: volta para a máquina e começa a animação junto com o pedido.
+    // volta à máquina e anima enquanto o pedido roda.
     revelacao.hidden = true;
     el.querySelector('.fase-maquina').hidden = false;
     maquina.classList.remove('saindo', 'abrindo');

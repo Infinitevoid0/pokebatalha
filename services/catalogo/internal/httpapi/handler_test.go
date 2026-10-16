@@ -15,7 +15,7 @@ import (
 	"pokebatalha/services/catalogo/internal/dominio"
 )
 
-// servicoFalso devolve sempre o mesmo resultado/erro.
+// devolve sempre o mesmo resultado/erro.
 type servicoFalso struct {
 	pokemon dominio.Pokemon
 	erro    error

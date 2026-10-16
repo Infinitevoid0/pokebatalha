@@ -1,5 +1,4 @@
-// Comando catalogo: microsserviço que consome a PokeAPI, guarda cache no
-// próprio banco e expõe REST (porta HTTP) e gRPC (porta gRPC).
+// microsserviço de catálogo: PokeAPI com cache no banco, REST e gRPC.
 package main
 
 import (
@@ -57,8 +56,7 @@ func rodar(log *slog.Logger) error {
 	fonte := pokeapi.NovoCliente(cfg.PokeAPIURL, cfg.PokeAPITimeout)
 	svc := servico.Novo(repo, fonte, sorteio.Aleatorio{}, log)
 
-	// Baixa a Pokédex para o cache em segundo plano (só na primeira vez),
-	// para o sorteio por tier não depender de várias idas à PokeAPI.
+	// baixa a Pokédex para o cache em segundo plano (só na primeira vez).
 	if cfg.AquecerCache {
 		go svc.Aquecer(ctx)
 	}

@@ -6,20 +6,19 @@ import (
 	"testing"
 )
 
-// sorteadorFixo: dano sempre máximo (Float64 = 1) e empates para o primeiro.
-// Com IntN = 0, toda decisão aleatória da IA "acontece" (ex: Protect).
+// dano máximo e IntN = 0: toda chance da IA acontece (ex: Protect).
 type sorteadorFixo struct{}
 
 func (sorteadorFixo) IntN(int) int     { return 0 }
 func (sorteadorFixo) Float64() float64 { return 1 }
 
-// semSorte: dano máximo, mas a IA nunca toma as decisões aleatórias.
+// dano máximo e IntN = n-1: a IA nunca age por sorte.
 type semSorte struct{}
 
 func (semSorte) IntN(n int) int   { return n - 1 }
 func (semSorte) Float64() float64 { return 1 }
 
-// tabelaTeste tem só as relações usadas nos testes.
+// só as relações de tipo usadas nos testes.
 var tabelaTeste = NovaTabela([]RelacaoTipo{
 	{Tipo: "fire", DobroPara: []string{"grass", "steel"}, MetadePara: []string{"water", "fire"}},
 	{Tipo: "water", DobroPara: []string{"fire", "ground"}, MetadePara: []string{"grass", "water"}},
@@ -61,7 +60,7 @@ func TestNovoLutador_StatusNoNivel50(t *testing.T) {
 }
 
 func TestEscolherHabilidade_PrioridadeCompetitiva(t *testing.T) {
-	// Torkoal tem white-smoke, drought e shell-armor: no VGC ele é usado pelo Drought.
+	// no VGC o Torkoal é usado pelo Drought.
 	if h := EscolherHabilidade([]string{"white-smoke", "drought", "shell-armor"}); h != "drought" {
 		t.Errorf("esperava drought, veio %q", h)
 	}
@@ -82,7 +81,7 @@ func TestCalcularDano_SuperEfetivoDobraODano(t *testing.T) {
 	if contraPlanta.mult != 2 || contraNormal.mult != 1 {
 		t.Fatalf("multiplicadores errados: %v e %v", contraPlanta.mult, contraNormal.mult)
 	}
-	// Pode variar 1 ponto por causa do arredondamento.
+	// pode variar 1 ponto pelo arredondamento.
 	if diff := contraPlanta.dano - 2*contraNormal.dano; diff < -1 || diff > 1 {
 		t.Errorf("super efetivo deveria causar o dobro: %d vs %d", contraPlanta.dano, contraNormal.dano)
 	}
@@ -164,7 +163,7 @@ func TestDroughtLigaOSol(t *testing.T) {
 }
 
 func TestFakeOut_PrioridadeRecuoESoPrimeiroTurno(t *testing.T) {
-	// Incineroar é lento, mas Fake Out tem prioridade: age antes e faz o rival recuar.
+	// o Incineroar é lento, mas o Fake Out tem prioridade: age antes e faz o rival recuar.
 	inc := lutador("incineroar", []string{"fire", "dark"}, "", 95, 115, 90, 60)
 	inc.AprendeFakeOut = true
 	rapido := lutador("jolteon", []string{"electric"}, "", 200, 65, 95, 130)
@@ -269,7 +268,7 @@ func TestProtect_BloqueiaENaoRepeteSeguido(t *testing.T) {
 	if !errors.Is(err, ErrAcaoInvalida) {
 		t.Fatalf("Protect duas vezes seguidas deveria ser inválido, veio %v", err)
 	}
-	// Depois de outra ação, volta a poder.
+	// depois de outra ação, volta a poder.
 	_ = b.ExecutarTurno(Escolha{Acao: AcaoFisico}, tabelaTeste, semSorte{})
 	if err := b.ExecutarTurno(Escolha{Acao: AcaoProtect}, tabelaTeste, semSorte{}); err != nil {
 		t.Fatalf("Protect deveria voltar depois de um ataque: %v", err)
@@ -347,8 +346,7 @@ func TestSegundoGolpeDeTipo(t *testing.T) {
 }
 
 func TestIA_TrocaQuandoOConfrontoEstaRuim(t *testing.T) {
-	// O rival tem um fogo/terra (4x fraco a água) na frente de um água,
-	// e um água bem resistente no banco.
+	// rival: fogo/terra (4x fraco a água) na frente e um água resistente no banco.
 	agua := lutador("blastoise", []string{"water"}, "", 79, 85, 100, 78)
 	fogo := lutador("camerupt", []string{"fire", "ground"}, "", 70, 105, 75, 40)
 	reserva := lutador("vaporeon", []string{"water"}, "", 130, 110, 95, 65)

@@ -1,5 +1,5 @@
-// Comando jogadores: microsserviço de contas, moedas, coleção e gacha.
-// Expõe REST para o jogador e gRPC para o serviço de batalha.
+// microsserviço de jogadores: contas, moedas, coleção e gacha.
+// expõe REST para o jogador e gRPC para a batalha.
 package main
 
 import (

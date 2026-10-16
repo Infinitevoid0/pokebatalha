@@ -1,5 +1,4 @@
-// Máquina de gacha em pixel art (SVG desenhado em grade de 4px).
-// As pokébolas dentro da cúpula tremem; a máquina inteira treme ao girar.
+// máquina de gacha em pixel art (SVG em grade de 4px).
 
 const BOLAS = [
   // x, y, cor da metade de cima

@@ -1,5 +1,4 @@
-// Chamadas HTTP para os microsserviços. As URLs são relativas: o NGINX
-// encaminha /api/<servico>/ para o serviço certo, então não há CORS.
+// chamadas aos microsserviços; o NGINX encaminha /api/<servico>/ (sem CORS).
 
 const BASE = {
   jogadores: '/api/jogadores',
@@ -44,8 +43,7 @@ async function chamarUmaVez(metodo, url, corpo) {
   }
 }
 
-// GET é seguro de repetir: tenta de novo em 502/503/rede, com espera crescente.
-// POST nunca é repetido automaticamente (abrir pacote cobra moedas).
+// GET repete em 502/503/rede com espera crescente; POST nunca (pacote cobra moedas).
 async function chamar(metodo, url, corpo) {
   const tentativas = metodo === 'GET' ? TENTATIVAS_GET : 1;
   for (let i = 1; ; i++) {
@@ -60,19 +58,19 @@ async function chamar(metodo, url, corpo) {
 }
 
 export const API = {
-  // --- Jogadores ---
+  // jogadores
   criarJogador: (nome) => chamar('POST', `${BASE.jogadores}/jogadores`, { nome }),
   buscarJogador: (id) => chamar('GET', `${BASE.jogadores}/jogadores/${encodeURIComponent(id)}`),
   abrirPacote: (id) => chamar('POST', `${BASE.jogadores}/jogadores/${id}/pacotes`),
   buscarColecao: (id) => chamar('GET', `${BASE.jogadores}/jogadores/${id}/colecao`),
   chancesGacha: () => chamar('GET', `${BASE.jogadores}/gacha/chances`),
 
-  // --- Batalha ---
+  // batalha
   criarBatalha: (jogadorID, time) => chamar('POST', `${BASE.batalha}/batalhas`, { jogador_id: jogadorID, time }),
   buscarBatalha: (id) => chamar('GET', `${BASE.batalha}/batalhas/${id}`),
   jogarTurno: (id, acao, alvo = 0) => chamar('POST', `${BASE.batalha}/batalhas/${id}/turnos`, { acao, alvo }),
   listarHabilidades: () => chamar('GET', `${BASE.batalha}/habilidades`),
 
-  // --- Catálogo ---
+  // catálogo
   buscarPokemon: (idOuNome) => chamar('GET', `${BASE.catalogo}/pokemons/${encodeURIComponent(idOuNome)}`),
 };

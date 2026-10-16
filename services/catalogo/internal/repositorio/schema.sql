@@ -1,4 +1,4 @@
--- Banco próprio do catálogo (catalogo_db): cache dos dados da PokeAPI.
+-- catalogo_db: cache dos dados da PokeAPI.
 CREATE TABLE IF NOT EXISTS pokemons (
     id               INT PRIMARY KEY,
     nome             TEXT NOT NULL UNIQUE,

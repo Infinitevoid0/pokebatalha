@@ -1,5 +1,4 @@
-// Menu de ações da batalha. Só mostra o que está em acoes_disponiveis;
-// "trocar" abre um submenu com os Pokémon do banco.
+// menu de ações: só o que está em acoes_disponiveis; "trocar" abre um submenu.
 import { exibir, escapar, traduzirTipo } from '../utils.js';
 import { imgPokemon } from '../sprites.js';
 
@@ -16,7 +15,7 @@ function rotulo(acao, lutador) {
   }
 }
 
-// onEscolher(acao, alvo) é chamado quando o jogador decide.
+// onEscolher(acao, alvo) roda quando o jogador decide.
 export function criarActionMenu(onEscolher) {
   const el = document.createElement('div');
   el.className = 'action-menu janela';

@@ -1,6 +1,6 @@
 package dominio
 
-// Especie são os dados do Pokémon como vêm do catálogo.
+// dados do Pokémon vindos do catálogo.
 type Especie struct {
 	PokemonID       int
 	Nome            string
@@ -18,8 +18,7 @@ type Especie struct {
 	Velocidade      int
 }
 
-// Lutador é o Pokémon dentro de uma batalha, com HP atual e estágios.
-// Tudo é calculado no nível 50, como no VGC.
+// um Pokémon em batalha (HP atual e estágios), no nível 50 como no VGC.
 type Lutador struct {
 	PokemonID           int      `json:"pokemon_id"`
 	Nome                string   `json:"nome"`
@@ -39,7 +38,7 @@ type Lutador struct {
 	TurnosEmCampo       int      `json:"turnos_em_campo"`
 	UsouProtect         bool     `json:"usou_protect"` // a última ação foi Protect
 
-	// Valem só durante o turno, não são salvos.
+	// só valem durante o turno; não são salvos.
 	protegido    bool // usou Protect neste turno
 	recemChegado bool // entrou por troca neste turno (não conta o turno em campo)
 }
@@ -49,10 +48,9 @@ const (
 	estagioMaximo = 6
 )
 
-// NovoLutador converte a espécie em lutador de nível 50.
-// Simplificação: o jogo só tem um "ataque" e uma "defesa", então usamos o
-// maior entre ataque físico/especial e a média das defesas. Assim atacantes
-// especiais (ex: Flutter Mane) não ficam inúteis.
+// converte a espécie em lutador de nível 50.
+// simplificação: usa o maior ataque e a média das defesas,
+// para atacantes especiais não ficarem inúteis.
 func NovoLutador(e Especie) Lutador {
 	ataque := max(e.Ataque, e.AtaqueEspecial)
 	defesa := (e.Defesa + e.DefesaEspecial) / 2
@@ -78,14 +76,13 @@ func NovoLutador(e Especie) Lutador {
 	}
 }
 
-// Desmaiado indica que o HP chegou a zero.
+// o HP chegou a zero.
 func (l *Lutador) Desmaiado() bool { return l.HP <= 0 }
 
-// PodeUsarFakeOut: só funciona no primeiro turno em campo, como no jogo.
+// só no primeiro turno em campo, como no jogo.
 func (l *Lutador) PodeUsarFakeOut() bool { return l.AprendeFakeOut && l.TurnosEmCampo == 0 }
 
-// mudarEstagio aplica delta respeitando os limites -6..+6 e devolve
-// quanto realmente mudou (0 se já estava no limite).
+// aplica delta no limite -6..+6 e devolve quanto mudou.
 func mudarEstagio(estagio *int, delta int) int {
 	novo := min(max(*estagio+delta, estagioMinimo), estagioMaximo)
 	aplicado := novo - *estagio
@@ -101,7 +98,7 @@ func multiplicadorEstagio(e int) float64 {
 	return 2 / float64(2-e)
 }
 
-// atributoImpulsionado é o atributo que Protosynthesis/Quark Drive melhora.
+// atributo que Protosynthesis/Quark Drive melhora.
 func (l *Lutador) atributoImpulsionado() string {
 	if l.Habilidade != "protosynthesis" && l.Habilidade != "quark-drive" {
 		return ""

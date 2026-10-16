@@ -12,7 +12,7 @@ import (
 	"pokebatalha/services/catalogo/internal/dominio"
 )
 
-// repoMemoria é um cache em memória para os testes.
+// cache em memória para os testes.
 type repoMemoria struct {
 	porID  map[int]dominio.Pokemon
 	tipos  map[string]dominio.RelacaoTipo
@@ -69,7 +69,7 @@ func (r *repoMemoria) SalvarTipo(_ context.Context, t dominio.RelacaoTipo) error
 	return nil
 }
 
-// fonteFalsa simula a PokeAPI e conta quantas vezes foi chamada.
+// uma PokeAPI falsa que conta as chamadas.
 type fonteFalsa struct {
 	pokemons map[string]dominio.Pokemon // chave: id em texto
 	erro     error
@@ -92,11 +92,11 @@ func (f *fonteFalsa) BuscarTipo(_ context.Context, nome string) (dominio.Relacao
 	if f.erro != nil {
 		return dominio.RelacaoTipo{}, f.erro
 	}
-	// Tabela neutra: todo ataque é 1x, então o poder vira stats + habilidade.
+	// tabela neutra: todo ataque é 1x, poder = stats + habilidade.
 	return dominio.RelacaoTipo{Tipo: nome}, nil
 }
 
-// sorteadorFixo devolve os valores na ordem dada (e 0 quando acabam).
+// devolve os valores na ordem dada (0 quando acabam).
 type sorteadorFixo struct{ valores []int }
 
 func (s *sorteadorFixo) IntN(n int) int {
@@ -108,7 +108,7 @@ func (s *sorteadorFixo) IntN(n int) int {
 	return v % n
 }
 
-// especie cria um Pokémon cujos stats somam exatamente "stats" no índice de poder.
+// cria um Pokémon cujos stats somam exatamente "stats" no índice.
 func especie(id int, nome string, stats int) dominio.Pokemon {
 	q := stats / 4
 	return dominio.Pokemon{ID: id, Nome: nome, Tipos: []string{"normal"},
@@ -190,7 +190,7 @@ func TestBuscarPorID_BancoForaDoArNaoViraNaoEncontrado(t *testing.T) {
 
 func TestSortear_RivalDePoderProximo(t *testing.T) {
 	repo := novoRepo()
-	// Lendários de 430 a 530, de 10 em 10.
+	// lendários de 430 a 530, de 10 em 10.
 	for i := range 11 {
 		p := especie(100+i, fmt.Sprintf("lendario-%d", i), 430+10*i)
 		repo.porID[p.ID] = p
@@ -202,7 +202,7 @@ func TestSortear_RivalDePoderProximo(t *testing.T) {
 		if err != nil {
 			t.Fatalf("erro inesperado: %v", err)
 		}
-		// Os 5 mais próximos de 440 vão de 430 a 470.
+		// os 5 mais próximos de 440 vão de 430 a 470.
 		if p.Poder.Total < 430 || p.Poder.Total > 470 {
 			t.Fatalf("rival com poder %d está longe demais de 440", p.Poder.Total)
 		}
@@ -212,7 +212,7 @@ func TestSortear_RivalDePoderProximo(t *testing.T) {
 func TestSortear_CacheFrioAmostraIDsAleatorios(t *testing.T) {
 	alvo := especie(500, "achado", 450)
 	fonte := fonteCom(especie(7, "fraco", 200), alvo)
-	// Primeiro sorteio cai no 7 (comum), o segundo no 500 (lendário).
+	// 1º sorteio cai no 7 (comum), o 2º no 500 (lendário).
 	svc := novoServico(t, novoRepo(), fonte, &sorteadorFixo{valores: []int{6, 499}})
 
 	p, err := svc.Sortear(context.Background(), dominio.TierLendario, 0)
@@ -225,7 +225,7 @@ func TestSortear_CacheFrioAmostraIDsAleatorios(t *testing.T) {
 }
 
 func TestSortear_SemNenhumCandidato(t *testing.T) {
-	// Toda a Pokédex é fraca: não existe lendário para sortear.
+	// a Pokédex toda é fraca: não há lendário para sortear.
 	fonte := fonteCom()
 	for id := 1; id <= dominio.MaiorIDNacional; id++ {
 		fonte.pokemons[strconv.Itoa(id)] = especie(id, fmt.Sprintf("p%d", id), 100)

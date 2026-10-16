@@ -1,10 +1,9 @@
-# Um Dockerfile para os três serviços: o argumento SERVICO escolhe qual compilar.
-#   docker build --build-arg SERVICO=catalogo -t pokebatalha-catalogo .
+# um Dockerfile para os três serviços; SERVICO escolhe qual compilar.
 
 FROM golang:1.24-alpine AS build
 WORKDIR /src
 
-# Baixa as dependências primeiro para aproveitar o cache de camadas.
+# dependências primeiro, para aproveitar o cache de camadas.
 COPY go.mod go.sum ./
 RUN go mod download
 
@@ -13,7 +12,7 @@ ARG SERVICO
 RUN test -n "$SERVICO" || (echo "defina --build-arg SERVICO=catalogo|jogadores|batalha" && exit 1)
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/app ./services/${SERVICO}/cmd
 
-# Imagem final mínima: só o binário e os certificados (para HTTPS na PokeAPI).
+# imagem mínima: só o binário e os certificados (HTTPS da PokeAPI).
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=build /out/app /app
 USER nonroot:nonroot

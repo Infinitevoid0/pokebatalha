@@ -1,4 +1,4 @@
-// Ponto de entrada: registra as telas e inicia o roteador.
+// registra as telas e inicia o roteador.
 import { registrar, iniciarRoteador } from './router.js';
 import { renderLogin } from './screens/login.js';
 import { renderMenu } from './screens/menu.js';

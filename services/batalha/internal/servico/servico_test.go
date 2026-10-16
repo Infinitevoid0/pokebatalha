@@ -9,14 +9,13 @@ import (
 	"pokebatalha/services/batalha/internal/dominio"
 )
 
-// sorteadorFixo: dano máximo e a IA nunca toma decisões aleatórias
-// (Protect, troca), para o resultado do turno ser previsível.
+// dano máximo e IA sem decisões aleatórias: turno previsível.
 type sorteadorFixo struct{}
 
 func (sorteadorFixo) IntN(n int) int   { return n - 1 }
 func (sorteadorFixo) Float64() float64 { return 1 }
 
-// catalogoFalso: o time do jogador é forte; o rival sorteado é fraquíssimo.
+// time do jogador forte, rival fraquíssimo.
 type catalogoFalso struct {
 	tiersSorteados []string
 	erro           error

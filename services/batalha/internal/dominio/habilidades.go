@@ -2,14 +2,13 @@ package dominio
 
 import "slices"
 
-// InfoHabilidade descreve uma habilidade implementada no jogo.
+// habilidade implementada no jogo.
 type InfoHabilidade struct {
 	Nome      string `json:"nome"`
 	Descricao string `json:"descricao"`
 }
 
-// Habilidades implementadas, em ordem de prioridade: se o Pokémon tiver mais
-// de uma, ele usa a que aparece primeiro (as mais relevantes no competitivo).
+// em ordem de prioridade: com mais de uma, vale a primeira da lista.
 var Habilidades = []InfoHabilidade{
 	{"intimidate", "Ao entrar, reduz o ataque do oponente em 1 estágio."},
 	{"drought", "Ao entrar, deixa o sol forte por 5 turnos (fogo x1.5, água x0.5)."},
@@ -50,7 +49,7 @@ var Habilidades = []InfoHabilidade{
 	{"inner-focus", "Imune a Intimidate e não recua com Fake Out."},
 }
 
-// imunidadePorHabilidade: habilidade -> tipo de ataque que ela anula.
+// habilidade -> tipo de ataque que ela anula.
 var imunidadePorHabilidade = map[string]string{
 	"levitate":      "ground",
 	"flash-fire":    "fire",
@@ -64,8 +63,7 @@ var imunidadePorHabilidade = map[string]string{
 
 var imunesAIntimidate = []string{"clear-body", "white-smoke", "full-metal-body", "inner-focus"}
 
-// EscolherHabilidade pega, entre as habilidades do Pokémon, a implementada de
-// maior prioridade. Devolve "" se nenhuma estiver implementada.
+// a habilidade implementada de maior prioridade; "" se nenhuma.
 func EscolherHabilidade(doPokemon []string) string {
 	for _, h := range Habilidades {
 		if slices.Contains(doPokemon, h.Nome) {
@@ -75,7 +73,7 @@ func EscolherHabilidade(doPokemon []string) string {
 	return ""
 }
 
-// DescricaoHabilidade devolve o texto explicativo da habilidade.
+// texto explicativo da habilidade.
 func DescricaoHabilidade(nome string) string {
 	for _, h := range Habilidades {
 		if h.Nome == nome {

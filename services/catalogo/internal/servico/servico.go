@@ -1,5 +1,4 @@
-// Package servico contém a lógica de negócio do catálogo: cache sobre a
-// PokeAPI, índice de poder de cada Pokémon e sorteio por tier.
+// negócio do catálogo: cache sobre a PokeAPI, índice de poder e sorteio por tier.
 package servico
 
 import (
@@ -16,7 +15,7 @@ import (
 	"pokebatalha/services/catalogo/internal/dominio"
 )
 
-// Repositorio é o cache local (implementado em repositorio.Postgres).
+// cache local (implementado em repositorio.Postgres).
 type Repositorio interface {
 	BuscarPokemonPorID(ctx context.Context, id int) (dominio.Pokemon, error)
 	BuscarPokemonPorNome(ctx context.Context, nome string) (dominio.Pokemon, error)
@@ -26,45 +25,43 @@ type Repositorio interface {
 	SalvarTipo(ctx context.Context, t dominio.RelacaoTipo) error
 }
 
-// FonteExterna é de onde vêm os dados originais (implementada em pokeapi.Cliente).
+// origem dos dados (implementada em pokeapi.Cliente).
 type FonteExterna interface {
 	BuscarPokemon(ctx context.Context, idOuNome string) (dominio.Pokemon, error)
 	BuscarTipo(ctx context.Context, nome string) (dominio.RelacaoTipo, error)
 }
 
-// Sorteador permite trocar a aleatoriedade por algo previsível nos testes.
+// permite um sorteio previsível nos testes.
 type Sorteador interface {
 	IntN(n int) int
 }
 
 const (
-	// Com o cache frio, o sorteio testa IDs aleatórios até achar o tier.
+	// cache frio: o sorteio testa IDs aleatórios até achar o tier.
 	tentativasAmostragem = 40
-	// O rival é escolhido entre os candidatos mais próximos do poder pedido.
+	// o rival sai dos candidatos de poder mais próximo.
 	janelaPoder        = 20
 	candidatosMinimos  = 5
 	maximoBuscaEmLote  = 50
 	trabalhadoresAquec = 4
 )
 
-// Servico é o caso de uso do catálogo.
 type Servico struct {
 	repo    Repositorio
 	fonte   FonteExterna
 	sorteio Sorteador
 	log     *slog.Logger
 
-	// A tabela de tipos não muda: carregamos uma vez e guardamos em memória.
+	// a tabela de tipos não muda: carrega uma vez e guarda em memória.
 	mu     sync.Mutex
 	tabela dominio.Tabela
 }
 
-// Novo monta o serviço com suas dependências.
 func Novo(repo Repositorio, fonte FonteExterna, s Sorteador, log *slog.Logger) *Servico {
 	return &Servico{repo: repo, fonte: fonte, sorteio: s, log: log}
 }
 
-// BuscarPorID devolve o Pokémon pelo número da PokeAPI.
+// busca pelo número da PokeAPI.
 func (s *Servico) BuscarPorID(ctx context.Context, id int) (dominio.Pokemon, error) {
 	if id < 1 {
 		return dominio.Pokemon{}, fmt.Errorf("%w: %d", dominio.ErrIDInvalido, id)
@@ -74,7 +71,7 @@ func (s *Servico) BuscarPorID(ctx context.Context, id int) (dominio.Pokemon, err
 	})
 }
 
-// BuscarPorNome devolve o Pokémon pelo nome usado na PokeAPI (ex: "incineroar").
+// busca pelo nome da PokeAPI (ex: "incineroar").
 func (s *Servico) BuscarPorNome(ctx context.Context, nome string) (dominio.Pokemon, error) {
 	nome = strings.ToLower(strings.TrimSpace(nome))
 	if nome == "" {
@@ -85,7 +82,7 @@ func (s *Servico) BuscarPorNome(ctx context.Context, nome string) (dominio.Pokem
 	})
 }
 
-// BuscarVarios devolve vários Pokémon de uma vez (usado para a coleção).
+// busca vários de uma vez (coleção).
 func (s *Servico) BuscarVarios(ctx context.Context, ids []int) ([]dominio.Pokemon, error) {
 	if len(ids) > maximoBuscaEmLote {
 		return nil, fmt.Errorf("%w: no máximo %d por vez", dominio.ErrIDInvalido, maximoBuscaEmLote)
@@ -101,7 +98,7 @@ func (s *Servico) BuscarVarios(ctx context.Context, ids []int) ([]dominio.Pokemo
 	return resultado, nil
 }
 
-// buscar tenta o cache e, se não achar, vai na PokeAPI e guarda o resultado.
+// tenta o cache; se não achar, busca na PokeAPI e salva.
 func (s *Servico) buscar(ctx context.Context, chave string, doCache func() (dominio.Pokemon, error)) (dominio.Pokemon, error) {
 	tabela, err := s.tabelaDeTipos(ctx)
 	if err != nil {
@@ -121,7 +118,7 @@ func (s *Servico) buscar(ctx context.Context, chave string, doCache func() (domi
 		return dominio.Pokemon{}, err // já vem classificado: negócio ou infraestrutura
 	}
 
-	// Falhar ao gravar o cache não impede de responder: só registramos.
+	// falha ao salvar o cache não impede a resposta: só loga.
 	if err := s.repo.SalvarPokemon(ctx, p); err != nil {
 		s.log.Warn("não foi possível salvar pokémon no cache", "pokemon", p.Nome, "erro", err)
 	}
@@ -134,15 +131,14 @@ func comPoder(p dominio.Pokemon, t dominio.Tabela) dominio.Pokemon {
 	return p
 }
 
-// Sortear escolhe um Pokémon aleatório do tier. Se poderReferencia > 0, sorteia
-// entre os de poder mais próximo (é assim que o rival fica equilibrado).
+// sorteia um Pokémon do tier; com poderReferencia > 0, entre os de poder mais próximo.
 func (s *Servico) Sortear(ctx context.Context, tier dominio.Tier, poderReferencia int) (dominio.Pokemon, error) {
 	candidatos, err := s.candidatosDoCache(ctx, tier)
 	if err != nil {
 		return dominio.Pokemon{}, err
 	}
 
-	// Cache frio (o aquecimento ainda não terminou): testa IDs aleatórios.
+	// cache frio (aquecimento em andamento): testa IDs aleatórios.
 	precisa := 1
 	if poderReferencia > 0 {
 		precisa = candidatosMinimos
@@ -187,8 +183,8 @@ func (s *Servico) candidatosDoCache(ctx context.Context, tier dominio.Tier) ([]d
 	return candidatos, nil
 }
 
-// maisProximos fica com quem está dentro da janela de poder, garantindo
-// pelo menos alguns candidatos para o sorteio não ficar previsível.
+// fica com quem está na janela de poder, com um mínimo de candidatos
+// para o sorteio não ficar previsível.
 func maisProximos(candidatos []dominio.Pokemon, alvo int) []dominio.Pokemon {
 	distancia := func(p dominio.Pokemon) int { return abs(p.Poder.Total - alvo) }
 	slices.SortStableFunc(candidatos, func(a, b dominio.Pokemon) int { return distancia(a) - distancia(b) })
@@ -207,7 +203,7 @@ func abs(x int) int {
 	return x
 }
 
-// TabelaDeTipos devolve as relações de dano dos 18 tipos.
+// relações de dano dos 18 tipos.
 func (s *Servico) TabelaDeTipos(ctx context.Context) ([]dominio.RelacaoTipo, error) {
 	tabela, err := s.tabelaDeTipos(ctx)
 	if err != nil {
@@ -256,8 +252,7 @@ func (s *Servico) relacaoTipo(ctx context.Context, nome string) (dominio.Relacao
 	return t, nil
 }
 
-// Efetividade calcula o multiplicador de um ataque contra um defensor
-// com um ou dois tipos.
+// multiplicador de um ataque contra um defensor de um ou dois tipos.
 func (s *Servico) Efetividade(ctx context.Context, ataque string, defensor []string) (float64, error) {
 	if err := dominio.ValidarTipo(ataque); err != nil {
 		return 0, err
@@ -277,14 +272,13 @@ func (s *Servico) Efetividade(ctx context.Context, ataque string, defensor []str
 	return tabela[ataque].Multiplicador(defensor), nil
 }
 
-// Regras devolve a fórmula do índice de poder e os cortes de tier.
+// fórmula do poder e cortes de tier.
 func (s *Servico) Regras() dominio.Regras {
 	return dominio.RegrasDoPoder()
 }
 
-// Aquecer baixa para o cache toda a Pokédex que ainda não está nele, para o
-// sorteio por tier ficar rápido. Roda em segundo plano ao subir o serviço;
-// depois disso a PokeAPI só é consultada de novo se o banco for apagado.
+// baixa para o cache a Pokédex que falta, para o sorteio por tier ficar rápido.
+// roda em segundo plano ao subir.
 func (s *Servico) Aquecer(ctx context.Context) {
 	if _, err := s.tabelaDeTipos(ctx); err != nil {
 		s.log.Warn("aquecimento adiado: tabela de tipos indisponível", "erro", err)

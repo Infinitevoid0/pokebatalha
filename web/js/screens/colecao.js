@@ -5,16 +5,15 @@ import { html, escapar, TIERS, TIER_PT, TIPOS_PT } from '../utils.js';
 import { mostrarErro } from '../components/dialog-box.js';
 import { agruparColecao, cardPokemon, abrirModalPokemon, poderDe } from '../components/pokemon-card.js';
 
-const LOTE_RENDER = 40; // cards inseridos por vez (o resto entra ao rolar)
+const LOTE_RENDER = 40; // cards por vez; o resto entra ao rolar
 
-// Busca a coleção, usando o cache do estado quando possível.
+// busca a coleção, usando o cache do estado.
 export async function carregarColecao() {
   if (!Estado.colecao) Estado.colecao = await API.buscarColecao(Estado.jogador.id);
   return Estado.colecao;
 }
 
-// Renderiza uma grade de cards em lotes, com IntersectionObserver para
-// coleções grandes. Devolve uma função que para o observer.
+// grade em lotes com IntersectionObserver; devolve a função que para o observer.
 export function renderizarGrade(grade, itens, opcoesCard = () => ({})) {
   grade.innerHTML = '';
   let pos = 0;
@@ -117,7 +116,7 @@ export async function renderColecao(app) {
   filtros.addEventListener('change', aplicar);
   aplicar();
 
-  // Um único listener para a grade inteira (delegação).
+  // um listener para a grade toda (delegação).
   grade.addEventListener('click', (e) => {
     const card = e.target.closest('.poke-card');
     if (!card) return;

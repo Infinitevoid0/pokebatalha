@@ -1,10 +1,8 @@
-// Comando jogar: cliente de terminal do PokéBatalha. Não é um microsserviço,
-// só consome as APIs REST de jogadores e batalha.
+// cliente de terminal do jogo (não é microsserviço).
 //
 //	go run ./cmd/jogar
 //
-// Variáveis opcionais: JOGADORES_URL (padrão http://localhost:8082)
-// e BATALHA_URL (padrão http://localhost:8083).
+// variáveis opcionais: JOGADORES_URL e BATALHA_URL.
 package main
 
 import (
@@ -508,7 +506,7 @@ func tipos(ts []string) string {
 	return strings.Join(nomes, "/")
 }
 
-// chamar faz a requisição, confere o status e decodifica a resposta.
+// faz a requisição, confere o status e decodifica a resposta.
 func (c *cliente) chamar(metodo, url string, corpo, destino any) error {
 	ctx, cancelar := context.WithTimeout(context.Background(), 90*time.Second)
 	defer cancelar()

@@ -1,9 +1,9 @@
-// Caixa de diálogo estilo GBA: texto digitado letra a letra e seta "▼".
+// diálogo estilo GBA: texto letra a letra e seta "▼".
 import { escapar, espera } from '../utils.js';
 
 const MS_POR_LETRA = 22;
 
-// Digita o texto dentro de um elemento. Clicar no elemento pula a animação.
+// digita o texto no elemento; clicar pula a animação.
 export async function digitar(el, texto, { msPorLetra = MS_POR_LETRA } = {}) {
   let pular = false;
   const pularFn = () => { pular = true; };
@@ -24,7 +24,7 @@ export function criarDialogo(texto = '') {
   return el;
 }
 
-// Diálogo flutuante global (erros e avisos). Some ao clicar, com Esc ou sozinho.
+// aviso flutuante global; some ao clicar, com Esc ou sozinho.
 let atual = null;
 export const DialogBox = {
   async mostrar(texto, variante = 'info', duracaoMs = 4500) {
@@ -54,7 +54,7 @@ export const DialogBox = {
 
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') DialogBox.fechar(); });
 
-// Mensagens amigáveis por código de erro da API.
+// mensagens amigáveis por código de erro da API.
 const MENSAGENS = {
   jogador_nao_encontrado: 'Jogador não encontrado. Verifique o ID.',
   pokemon_nao_encontrado: 'Pokémon não encontrado.',

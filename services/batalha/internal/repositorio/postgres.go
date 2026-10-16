@@ -1,4 +1,4 @@
-// Package repositorio isola o acesso ao banco de batalhas.
+// acesso ao banco de batalhas.
 package repositorio
 
 import (
@@ -17,17 +17,15 @@ import (
 //go:embed schema.sql
 var schema string
 
-// Postgres guarda as batalhas.
 type Postgres struct {
 	pool *pgxpool.Pool
 }
 
-// NovoPostgres cria o repositório sobre um pool já conectado.
 func NovoPostgres(pool *pgxpool.Pool) *Postgres {
 	return &Postgres{pool: pool}
 }
 
-// Migrar cria as tabelas, se ainda não existirem.
+// cria as tabelas se não existirem.
 func (r *Postgres) Migrar(ctx context.Context) error {
 	if _, err := r.pool.Exec(ctx, schema); err != nil {
 		return fmt.Errorf("criar tabelas de batalha: %w", err)
@@ -35,7 +33,7 @@ func (r *Postgres) Migrar(ctx context.Context) error {
 	return nil
 }
 
-// Criar insere a batalha e preenche ID e versão.
+// insere e preenche ID e versão.
 func (r *Postgres) Criar(ctx context.Context, b *dominio.Batalha) error {
 	estado, err := json.Marshal(b)
 	if err != nil {
@@ -51,7 +49,7 @@ func (r *Postgres) Criar(ctx context.Context, b *dominio.Batalha) error {
 	return nil
 }
 
-// Buscar devolve dominio.ErrBatalhaNaoEncontrada se o ID não existir.
+// devolve ErrBatalhaNaoEncontrada se o ID não existir.
 func (r *Postgres) Buscar(ctx context.Context, id int64) (*dominio.Batalha, error) {
 	var (
 		estado []byte
@@ -73,8 +71,7 @@ func (r *Postgres) Buscar(ctx context.Context, id int64) (*dominio.Batalha, erro
 	return &b, nil
 }
 
-// Atualizar grava o novo estado, mas só se ninguém tiver gravado antes
-// (controle otimista de concorrência pela coluna versao).
+// grava só se ninguém gravou antes (concorrência otimista pela coluna versao).
 func (r *Postgres) Atualizar(ctx context.Context, b *dominio.Batalha) error {
 	estado, err := json.Marshal(b)
 	if err != nil {

@@ -1,5 +1,4 @@
-// Package observabilidade concentra logs estruturados (slog em JSON)
-// e os middlewares que registram cada requisição HTTP e chamada gRPC.
+// logs estruturados em JSON (slog) e middlewares de HTTP e gRPC.
 package observabilidade
 
 import (
@@ -13,7 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// NovoLogger cria um logger JSON que marca todas as linhas com o nome do serviço.
+// logger JSON que carimba o nome do serviço em toda linha.
 func NovoLogger(servico string) *slog.Logger {
 	h := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})
 	return slog.New(h).With("servico", servico)
@@ -29,7 +28,7 @@ func (r *respostaComStatus) WriteHeader(status int) {
 	r.ResponseWriter.WriteHeader(status)
 }
 
-// MiddlewareHTTP registra método, caminho, status e duração de cada requisição.
+// loga método, caminho, status e duração de cada requisição.
 func MiddlewareHTTP(log *slog.Logger, prox http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		inicio := time.Now()
@@ -49,7 +48,7 @@ func MiddlewareHTTP(log *slog.Logger, prox http.Handler) http.Handler {
 	})
 }
 
-// InterceptadorGRPC registra cada chamada gRPC recebida pelo servidor.
+// loga cada chamada gRPC recebida.
 func InterceptadorGRPC(log *slog.Logger) grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req any, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (any, error) {
 		inicio := time.Now()

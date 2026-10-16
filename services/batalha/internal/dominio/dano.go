@@ -6,7 +6,7 @@ import (
 	"slices"
 )
 
-// Acao é o que o jogador escolhe fazer no turno.
+// o que o jogador faz no turno.
 type Acao string
 
 const (
@@ -20,13 +20,13 @@ const (
 
 var acoesValidas = []Acao{AcaoFisico, AcaoTipo, AcaoTipo2, AcaoFakeOut, AcaoProtect, AcaoTrocar}
 
-// Escolha é a ação do turno; Alvo só vale para "trocar" (índice no time).
+// ação do turno; Alvo só vale para "trocar".
 type Escolha struct {
 	Acao Acao
 	Alvo int
 }
 
-// ParseAcao valida o texto vindo do cliente.
+// valida a ação vinda do cliente.
 func ParseAcao(s string) (Acao, error) {
 	a := Acao(s)
 	if !slices.Contains(acoesValidas, a) {
@@ -35,7 +35,7 @@ func ParseAcao(s string) (Acao, error) {
 	return a, nil
 }
 
-// golpesDisponiveis lista os golpes de ataque do lutador (sem Protect e troca).
+// golpes de ataque do lutador (sem Protect e troca).
 func golpesDisponiveis(l *Lutador) []Acao {
 	golpes := []Acao{AcaoFisico, AcaoTipo}
 	if len(l.Tipos) > 1 {
@@ -73,8 +73,7 @@ func golpeDe(a Acao, atacante *Lutador) golpe {
 	}
 }
 
-// efetividade combina a tabela de tipos com as imunidades por habilidade.
-// imunePor é o nome da habilidade que anulou o golpe (se houver).
+// tabela de tipos + imunidades por habilidade; imunePor diz qual habilidade anulou.
 func efetividade(g golpe, alvo *Lutador, t TabelaTipos) (mult float64, imunePor string) {
 	if g.tipo == "" {
 		return 1, ""
@@ -85,7 +84,7 @@ func efetividade(g golpe, alvo *Lutador, t TabelaTipos) (mult float64, imunePor 
 	return t.Multiplicador(g.tipo, alvo.Tipos), ""
 }
 
-// modificadores são os outros multiplicadores de dano: clima e habilidades.
+// outros multiplicadores: clima e habilidades.
 func modificadores(g golpe, atk, alvo *Lutador, clima Clima) float64 {
 	m := 1.0
 
@@ -171,7 +170,7 @@ type resultadoDano struct {
 	sturdy   bool
 }
 
-// calcularDano usa a fórmula dos jogos no nível 50 (simplificada):
+// fórmula dos jogos no nível 50, simplificada:
 //
 //	base = (22 * poder * ataque / defesa) / 50 + 2
 //	dano = base * efetividade * modificadores * aleatório(0.85 a 1.0)

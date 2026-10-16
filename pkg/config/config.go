@@ -1,4 +1,4 @@
-// Package config lê variáveis de ambiente com valores padrão e validação.
+// leitura de variáveis de ambiente com padrão e validação.
 package config
 
 import (
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// Texto devolve a variável de ambiente ou o valor padrão se ela estiver vazia.
+// valor da variável ou o padrão.
 func Texto(chave, padrao string) string {
 	if v := os.Getenv(chave); v != "" {
 		return v
@@ -16,7 +16,7 @@ func Texto(chave, padrao string) string {
 	return padrao
 }
 
-// Inteiro devolve a variável como int, ou erro se ela tiver um valor inválido.
+// variável como int; erro se inválida.
 func Inteiro(chave string, padrao int) (int, error) {
 	v := os.Getenv(chave)
 	if v == "" {
@@ -29,7 +29,7 @@ func Inteiro(chave string, padrao int) (int, error) {
 	return n, nil
 }
 
-// Duracao devolve a variável como time.Duration (ex: "5s", "300ms").
+// variável como duração (ex: "5s").
 func Duracao(chave string, padrao time.Duration) (time.Duration, error) {
 	v := os.Getenv(chave)
 	if v == "" {
@@ -42,7 +42,7 @@ func Duracao(chave string, padrao time.Duration) (time.Duration, error) {
 	return d, nil
 }
 
-// Obrigatorio devolve a variável ou erro se ela não estiver definida.
+// erro se a variável não existir.
 func Obrigatorio(chave string) (string, error) {
 	v := os.Getenv(chave)
 	if v == "" {

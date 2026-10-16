@@ -1,12 +1,6 @@
-// Servidor de desenvolvimento sem dependências: serve a pasta web/ e faz o
-// mesmo proxy do nginx.conf (/api/<servico>/ -> serviço). Útil para mexer
-// no front sem Docker, com os serviços rodando localmente.
-//
-//   node web/dev-server.mjs            (porta 8080)
-//   PORTA=3000 node web/dev-server.mjs
-//
-// Por padrão aponta para as portas expostas pelo docker compose
-// (catalogo 8081, jogadores 8082, batalha 8083).
+// servidor de dev sem dependências: serve web/ e faz o mesmo proxy do nginx.conf.
+// uso: node web/dev-server.mjs (porta 8080; mude com PORTA=3000).
+// aponta para as portas do compose: catalogo 8081, jogadores 8082, batalha 8083.
 import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';

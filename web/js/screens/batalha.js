@@ -14,7 +14,7 @@ import { carregarColecao, renderizarGrade } from './colecao.js';
 const TAMANHO_TIME = 3;
 const CLIMA_PT = { sol: 'Sol forte', chuva: 'Chuva' };
 
-/* ===================== Seleção de time ===================== */
+// seleção de time
 
 export async function renderSelecaoTime(app) {
   const el = html(`
@@ -58,7 +58,7 @@ export async function renderSelecaoTime(app) {
     return;
   }
 
-  // Mantém o último time usado, se ainda estiver na coleção.
+  // mantém o último time, se ainda estiver na coleção.
   let time = Estado.time.filter((id) => porId.has(id)).slice(0, TAMANHO_TIME);
   let pararGrade = () => {};
 
@@ -109,9 +109,9 @@ export async function renderSelecaoTime(app) {
   return () => pararGrade();
 }
 
-/* ===================== Batalha ===================== */
+// batalha
 
-// Lê a linha do log e diz de que lado ela fala ("Seu X" ou "X do rival").
+// de que lado é a linha do log ("Seu X" ou "X do rival").
 function ladoDaLinha(linha) {
   if (/^Seu /.test(linha)) return 'jogador';
   if (/ do rival\b/.test(linha)) return 'rival';
@@ -166,8 +166,7 @@ export async function renderBatalha(app) {
     desenharTopo(b);
   }
 
-  // Reproduz o log do turno linha a linha, aplicando cada efeito no
-  // estado visual (que começa igual ao estado anterior).
+  // reproduz o log linha a linha, aplicando cada efeito na tela.
   async function reproduzir(anterior, novo) {
     const visual = structuredClone(anterior);
     const ladoVisual = (lado) => (lado === 'rival' ? visual.cpu : visual.jogador);
@@ -246,7 +245,7 @@ export async function renderBatalha(app) {
     } catch (err) {
       if (err.codigo === 'batalha_encerrada') { navegar('menu'); return; }
       mostrarErro(err);
-      // Em conflito (ex: duas abas), recarrega o estado real da batalha.
+      // conflito (ex: duas abas): recarrega o estado real.
       if (err.codigo === 'conflito' || err.codigo === 'batalha_nao_encontrada') {
         try { atual = await API.buscarBatalha(atual.id); desenharTudo(atual); } catch { /* segue com o que tem */ }
       }
@@ -287,7 +286,7 @@ export async function renderBatalha(app) {
     fundo.querySelector('[data-ir]').focus();
   }
 
-  // Primeiro desenho: estado inicial e o log de abertura (habilidades de entrada).
+  // primeiro desenho: estado inicial e log de abertura.
   desenharTudo(atual);
   const inicio = structuredClone(atual);
   log.limpar();

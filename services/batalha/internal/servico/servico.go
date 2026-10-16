@@ -1,5 +1,5 @@
-// Package servico orquestra a batalha: valida o time no serviço de
-// jogadores, busca os dados no catálogo, roda o motor e paga a recompensa.
+// orquestra a batalha: valida o time, busca dados no catálogo,
+// roda o motor e paga a recompensa.
 package servico
 
 import (
@@ -11,27 +11,26 @@ import (
 	"pokebatalha/services/batalha/internal/dominio"
 )
 
-// Catalogo é o microsserviço de catálogo (implementado em clientes.Catalogo).
+// catálogo (implementado em clientes.Catalogo).
 type Catalogo interface {
 	BuscarPokemon(ctx context.Context, id int) (dominio.Especie, error)
 	SortearPokemon(ctx context.Context, tier string, poder int) (dominio.Especie, error)
 	TabelaDeTipos(ctx context.Context) (dominio.Tabela, error)
 }
 
-// Jogadores é o microsserviço de jogadores (implementado em clientes.Jogadores).
+// jogadores (implementado em clientes.Jogadores).
 type Jogadores interface {
 	ValidarTime(ctx context.Context, jogadorID int64, pokemonIDs []int) error
 	CreditarMoedas(ctx context.Context, jogadorID int64, quantidade int) (int, error)
 }
 
-// Repositorio é o banco de batalhas (implementado em repositorio.Postgres).
+// banco de batalhas (implementado em repositorio.Postgres).
 type Repositorio interface {
 	Criar(ctx context.Context, b *dominio.Batalha) error
 	Buscar(ctx context.Context, id int64) (*dominio.Batalha, error)
 	Atualizar(ctx context.Context, b *dominio.Batalha) error
 }
 
-// Servico é o caso de uso da batalha.
 type Servico struct {
 	repo       Repositorio
 	catalogo   Catalogo
@@ -39,12 +38,11 @@ type Servico struct {
 	sorteio    dominio.Sorteador
 	recompensa int
 
-	// A tabela de tipos não muda: buscamos uma vez e guardamos em memória.
+	// a tabela de tipos não muda: busca uma vez e guarda em memória.
 	mu     sync.Mutex
 	tabela dominio.Tabela
 }
 
-// Novo monta o serviço com suas dependências.
 func Novo(repo Repositorio, cat Catalogo, jog Jogadores, s dominio.Sorteador, recompensa int) *Servico {
 	return &Servico{repo: repo, catalogo: cat, jogadores: jog, sorteio: s, recompensa: recompensa}
 }
@@ -63,8 +61,7 @@ func (s *Servico) tabelaDeTipos(ctx context.Context) (dominio.Tabela, error) {
 	return t, nil
 }
 
-// CriarBatalha monta o time do jogador e um time da CPU equilibrado: para
-// cada Pokémon seu, o rival recebe um do mesmo tier e de poder parecido.
+// monta o time do jogador e um rival equilibrado: mesmo tier e poder parecido.
 func (s *Servico) CriarBatalha(ctx context.Context, jogadorID int64, pokemonIDs []int) (*dominio.Batalha, error) {
 	if jogadorID < 1 {
 		return nil, fmt.Errorf("%w: jogador_id é obrigatório", dominio.ErrTimeInvalido)
@@ -76,16 +73,16 @@ func (s *Servico) CriarBatalha(ctx context.Context, jogadorID int64, pokemonIDs 
 		return nil, fmt.Errorf("%w: não repita pokémon no time", dominio.ErrTimeInvalido)
 	}
 
-	// 1. O serviço de jogadores confirma que o time é mesmo dele (gRPC).
+	// 1. jogadores confirma que o time é dele (gRPC).
 	if err := s.jogadores.ValidarTime(ctx, jogadorID, pokemonIDs); err != nil {
 		return nil, err
 	}
-	// 2. Garante a tabela de tipos antes de começar.
+	// 2. garante a tabela de tipos.
 	if _, err := s.tabelaDeTipos(ctx); err != nil {
 		return nil, err
 	}
 
-	// 3. Dados do time do jogador e sorteio do time rival, tier por tier (gRPC).
+	// 3. dados do time e sorteio do rival, tier por tier (gRPC).
 	timeJogador := make([]dominio.Lutador, 0, len(pokemonIDs))
 	timeCPU := make([]dominio.Lutador, 0, len(pokemonIDs))
 	for _, id := range pokemonIDs {
@@ -112,12 +109,12 @@ func (s *Servico) CriarBatalha(ctx context.Context, jogadorID int64, pokemonIDs 
 	return b, nil
 }
 
-// Buscar devolve o estado atual da batalha.
+// estado atual da batalha.
 func (s *Servico) Buscar(ctx context.Context, id int64) (*dominio.Batalha, error) {
 	return s.repo.Buscar(ctx, id)
 }
 
-// Jogar executa um turno com a ação escolhida (alvo só vale para "trocar").
+// executa um turno (alvo só vale para "trocar").
 func (s *Servico) Jogar(ctx context.Context, id int64, acaoTexto string, alvo int) (*dominio.Batalha, error) {
 	acao, err := dominio.ParseAcao(acaoTexto)
 	if err != nil {
@@ -135,8 +132,8 @@ func (s *Servico) Jogar(ctx context.Context, id int64, acaoTexto string, alvo in
 		return nil, err
 	}
 
-	// Paga antes de salvar: se o serviço de jogadores estiver fora, o turno
-	// não é gravado e o jogador pode tentar de novo sem perder a recompensa.
+	// paga antes de salvar: se jogadores cair, o turno não é gravado
+	// e o jogador tenta de novo sem perder a recompensa.
 	if b.Status == dominio.Vitoria {
 		if _, err := s.jogadores.CreditarMoedas(ctx, b.JogadorID, s.recompensa); err != nil {
 			return nil, err

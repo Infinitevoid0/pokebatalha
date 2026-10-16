@@ -1,4 +1,4 @@
-/* ===== Janela retro (painéis) ===== */
+/* janela retro (painéis) */
 .janela {
   background: var(--bg-secondary);
   border: var(--border-pixel);
@@ -13,7 +13,7 @@
   line-height: 1.2;
 }
 
-/* ===== Botões ===== */
+/* botões */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -40,7 +40,7 @@
 
 :focus-visible { outline: 3px dashed var(--accent-gold); outline-offset: 3px; }
 
-/* ===== Campos ===== */
+/* campos */
 .campo { display: flex; flex-direction: column; gap: var(--sp-2); }
 .campo label { font-size: var(--fs-xs); color: var(--text-secondary); text-transform: uppercase; }
 .input {
@@ -62,7 +62,7 @@
   font-size: var(--fs-xs);
 }
 
-/* ===== Caixa de diálogo estilo GBA ===== */
+/* caixa de diálogo estilo GBA */
 .dialogo {
   position: relative;
   background: var(--bg-dialog);
@@ -88,7 +88,7 @@
 }
 .dialogo-flutuante.erro { border-color: var(--accent-red); }
 
-/* ===== Badges ===== */
+/* badges */
 .tipo-badge {
   display: inline-flex;
   align-items: center;
@@ -123,7 +123,7 @@
 .tier-badge.tier-epico    { animation: pulso 1.4s steps(4) infinite; }
 .tier-badge.tier-lendario { animation: brilho-ouro 1.2s steps(6) infinite; }
 
-/* ===== Card de Pokémon ===== */
+/* card de Pokémon */
 .poke-card {
   position: relative;
   display: flex;
@@ -166,10 +166,10 @@ button.poke-card:hover { transform: translateY(-3px); }
   font-size: var(--fs-sm);
 }
 
-/* ===== Sprites ===== */
+/* sprites */
 .sprite { image-rendering: pixelated; object-fit: contain; }
 
-/* ===== Barra de HP ===== */
+/* barra de HP */
 .hp {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -193,7 +193,7 @@ button.poke-card:hover { transform: translateY(-3px); }
 }
 .hp-texto { grid-column: 2; justify-self: end; font-size: var(--fs-md); }
 
-/* ===== Modal ===== */
+/* modal */
 .modal-fundo {
   position: fixed; inset: 0;
   background: rgba(13,15,24,.85);
@@ -203,7 +203,7 @@ button.poke-card:hover { transform: translateY(-3px); }
 }
 .modal { width: min(460px, 100%); max-height: calc(100vh - 32px); overflow: auto; }
 
-/* ===== Tabela de stats ===== */
+/* tabela de stats */
 .stats { display: grid; grid-template-columns: auto 1fr auto; gap: 6px var(--sp-2); align-items: center; font-size: var(--fs-xs); }
 .stats .barra { height: 8px; background: var(--bg-deep); }
 .stats .barra span { display: block; height: 100%; background: var(--accent-blue); transform-origin: left; }

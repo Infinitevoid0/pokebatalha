@@ -1,4 +1,4 @@
-// Package grpcapi expõe o catálogo para os outros microsserviços via gRPC.
+// catálogo via gRPC para os outros serviços.
 package grpcapi
 
 import (
@@ -13,7 +13,7 @@ import (
 	"pokebatalha/services/catalogo/internal/dominio"
 )
 
-// Servico é o que o servidor gRPC precisa da camada de negócio.
+// o que o servidor gRPC precisa do negócio.
 type Servico interface {
 	BuscarPorID(ctx context.Context, id int) (dominio.Pokemon, error)
 	BuscarVarios(ctx context.Context, ids []int) ([]dominio.Pokemon, error)
@@ -21,14 +21,13 @@ type Servico interface {
 	TabelaDeTipos(ctx context.Context) ([]dominio.RelacaoTipo, error)
 }
 
-// Servidor implementa catalogov1.CatalogoServer.
+// implementa catalogov1.CatalogoServer.
 type Servidor struct {
 	catalogov1.UnimplementedCatalogoServer
 	svc Servico
 	log *slog.Logger
 }
 
-// Novo cria o servidor gRPC.
 func Novo(svc Servico, log *slog.Logger) *Servidor {
 	return &Servidor{svc: svc, log: log}
 }
@@ -86,8 +85,7 @@ func (s *Servidor) TabelaDeTipos(ctx context.Context, _ *catalogov1.TabelaDeTipo
 	return resp, nil
 }
 
-// paraStatus traduz erros do domínio para códigos gRPC, mantendo a mesma
-// separação negócio x infraestrutura usada no HTTP.
+// erro do domínio -> código gRPC (mesma separação do HTTP).
 func (s *Servidor) paraStatus(err error) error {
 	switch {
 	case errors.Is(err, dominio.ErrIDInvalido),
@@ -105,7 +103,7 @@ func (s *Servidor) paraStatus(err error) error {
 	}
 }
 
-// ParaProto converte o Pokémon do domínio para a mensagem gRPC.
+// converte o Pokémon para a mensagem gRPC.
 func ParaProto(p dominio.Pokemon) *catalogov1.Pokemon {
 	return &catalogov1.Pokemon{
 		Id:             int32(p.ID),

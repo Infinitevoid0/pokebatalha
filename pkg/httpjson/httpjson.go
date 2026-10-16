@@ -1,4 +1,4 @@
-// Package httpjson padroniza a leitura e escrita de JSON nos handlers HTTP.
+// leitura e escrita de JSON padronizadas.
 package httpjson
 
 import (
@@ -11,28 +11,27 @@ import (
 
 const tamanhoMaximoCorpo = 1 << 20 // 1 MB
 
-// Erro é o formato de toda resposta de erro da API.
+// formato padrão de erro da API.
 type Erro struct {
 	Codigo   string `json:"codigo"`
 	Mensagem string `json:"mensagem"`
 }
 
-// Escrever serializa v como JSON com o status informado.
+// escreve v em JSON com o status.
 func Escrever(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(v) // a conexão pode ter caído; não há o que fazer
+	_ = json.NewEncoder(w).Encode(v) // a conexão pode ter caído; nada a fazer
 }
 
-// EscreverErro responde com o formato padrão de erro.
 func EscreverErro(w http.ResponseWriter, status int, codigo, mensagem string) {
 	Escrever(w, status, Erro{Codigo: codigo, Mensagem: mensagem})
 }
 
-// ErrCorpoInvalido indica JSON malformado, campos desconhecidos ou corpo grande demais.
+// corpo com JSON malformado, campo desconhecido ou corpo grande demais.
 var ErrCorpoInvalido = errors.New("corpo da requisição inválido")
 
-// Ler decodifica o corpo JSON em destino, rejeitando campos desconhecidos.
+// decodifica o JSON e recusa campos desconhecidos.
 func Ler(r *http.Request, destino any) error {
 	dec := json.NewDecoder(io.LimitReader(r.Body, tamanhoMaximoCorpo))
 	dec.DisallowUnknownFields()

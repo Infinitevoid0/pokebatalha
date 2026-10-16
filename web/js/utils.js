@@ -1,4 +1,4 @@
-// Helpers de texto e DOM.
+// helpers de texto e DOM.
 
 export const TIPOS_PT = {
   normal: 'Normal', fire: 'Fogo', water: 'Água', electric: 'Elétrico',
@@ -14,7 +14,7 @@ export const TIER_ESTRELAS = { comum: '', raro: '★', epico: '★★', lendario
 
 export const traduzirTipo = (t) => TIPOS_PT[t] ?? t;
 
-// Mesma regra do back-end: "flutter-mane" -> "Flutter Mane".
+// "flutter-mane" -> "Flutter Mane" (igual ao back-end).
 export function exibir(nome) {
   if (!nome) return '-';
   return nome.split('-').map((p) => (p ? p[0].toUpperCase() + p.slice(1) : p)).join(' ');
@@ -24,7 +24,7 @@ export function escapar(texto) {
   return String(texto ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-// Cria elemento a partir de HTML (o chamador escapa os dados com escapar()).
+// cria elemento a partir de HTML (quem chama escapa os dados).
 export function html(texto) {
   const t = document.createElement('template');
   t.innerHTML = texto.trim();
@@ -33,7 +33,7 @@ export function html(texto) {
 
 export const espera = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Reinicia uma animação CSS que pode estar no meio.
+// reinicia uma animação CSS.
 export function animar(el, classe, duracaoMs) {
   if (!el) return Promise.resolve();
   el.classList.remove(classe);

@@ -1,4 +1,4 @@
-// Package repositorio isola o acesso ao banco de jogadores.
+// acesso ao banco de jogadores.
 package repositorio
 
 import (
@@ -18,20 +18,19 @@ import (
 //go:embed schema.sql
 var schema string
 
-// codigoViolacaoUnique é o código do Postgres para chave duplicada.
+// código do Postgres para chave duplicada.
 const codigoViolacaoUnique = "23505"
 
-// Postgres guarda jogadores e coleções.
+// jogadores e coleções.
 type Postgres struct {
 	pool *pgxpool.Pool
 }
 
-// NovoPostgres cria o repositório sobre um pool já conectado.
 func NovoPostgres(pool *pgxpool.Pool) *Postgres {
 	return &Postgres{pool: pool}
 }
 
-// Migrar cria as tabelas, se ainda não existirem.
+// cria as tabelas se não existirem.
 func (r *Postgres) Migrar(ctx context.Context) error {
 	if _, err := r.pool.Exec(ctx, schema); err != nil {
 		return fmt.Errorf("criar tabelas de jogadores: %w", err)
@@ -39,7 +38,7 @@ func (r *Postgres) Migrar(ctx context.Context) error {
 	return nil
 }
 
-// Criar insere um jogador novo.
+// insere um jogador novo.
 func (r *Postgres) Criar(ctx context.Context, nome string, moedas int) (dominio.Jogador, error) {
 	j := dominio.Jogador{Nome: nome, Moedas: moedas}
 	err := r.pool.QueryRow(ctx,
@@ -57,7 +56,7 @@ func (r *Postgres) Criar(ctx context.Context, nome string, moedas int) (dominio.
 	return j, nil
 }
 
-// BuscarPorID devolve dominio.ErrJogadorNaoEncontrado se o ID não existir.
+// devolve ErrJogadorNaoEncontrado se o ID não existir.
 func (r *Postgres) BuscarPorID(ctx context.Context, id int64) (dominio.Jogador, error) {
 	var j dominio.Jogador
 	err := r.pool.QueryRow(ctx, `
@@ -73,7 +72,7 @@ func (r *Postgres) BuscarPorID(ctx context.Context, id int64) (dominio.Jogador, 
 	return j, nil
 }
 
-// ListarColecao devolve os Pokémon do jogador, do mais recente ao mais antigo.
+// lista os Pokémon do jogador, do mais recente ao mais antigo.
 func (r *Postgres) ListarColecao(ctx context.Context, jogadorID int64) ([]dominio.ItemColecao, error) {
 	linhas, err := r.pool.Query(ctx, `
 		SELECT id, pokemon_id, nome, tier, tipos, adquirido_em
@@ -97,10 +96,9 @@ func (r *Postgres) ListarColecao(ctx context.Context, jogadorID int64) ([]domini
 	return itens, nil
 }
 
-// RegistrarCompra debita o pacote, atualiza o pity e adiciona o Pokémon na
-// mesma transação, para nunca cobrar sem entregar (nem entregar sem cobrar).
-// O UPDATE só acontece se o pity ainda for o que foi lido antes do sorteio:
-// assim dois pacotes abertos ao mesmo tempo não usam a mesma garantia.
+// debita, atualiza o pity e entrega na mesma transação (nunca cobra sem entregar).
+// o UPDATE só passa se o pity não mudou desde o sorteio:
+// dois pacotes simultâneos não usam a mesma garantia.
 func (r *Postgres) RegistrarCompra(ctx context.Context, jogadorID int64, custo int, pityLido, pityNovo dominio.Pity, p dominio.PokemonSorteado) (dominio.ItemColecao, int, error) {
 	tx, err := r.pool.Begin(ctx)
 	if err != nil {
@@ -117,7 +115,7 @@ func (r *Postgres) RegistrarCompra(ctx context.Context, jogadorID int64, custo i
 		custo, pityNovo.SemEpico, pityNovo.SemLendario, jogadorID, pityLido.SemEpico, pityLido.SemLendario,
 	).Scan(&saldo)
 	if errors.Is(err, pgx.ErrNoRows) {
-		// Nenhuma linha: jogador não existe, não tem saldo, ou outro pacote mudou o pity.
+		// nenhuma linha: jogador não existe, sem saldo, ou o pity mudou.
 		j, errBusca := r.BuscarPorID(ctx, jogadorID)
 		if errBusca != nil {
 			return dominio.ItemColecao{}, 0, errBusca
@@ -148,7 +146,7 @@ func (r *Postgres) RegistrarCompra(ctx context.Context, jogadorID int64, custo i
 	return it, saldo, nil
 }
 
-// Creditar soma moedas ao saldo e devolve o saldo novo.
+// soma moedas e devolve o saldo novo.
 func (r *Postgres) Creditar(ctx context.Context, jogadorID int64, quantidade int) (int, error) {
 	var saldo int
 	err := r.pool.QueryRow(ctx,
@@ -164,7 +162,7 @@ func (r *Postgres) Creditar(ctx context.Context, jogadorID int64, quantidade int
 	return saldo, nil
 }
 
-// PokemonsFaltando devolve quais dos IDs pedidos o jogador NÃO possui.
+// quais dos IDs o jogador não possui.
 func (r *Postgres) PokemonsFaltando(ctx context.Context, jogadorID int64, pokemonIDs []int) ([]int, error) {
 	linhas, err := r.pool.Query(ctx,
 		`SELECT DISTINCT pokemon_id FROM colecao WHERE jogador_id = $1 AND pokemon_id = ANY($2)`,

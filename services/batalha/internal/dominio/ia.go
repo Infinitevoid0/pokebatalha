@@ -2,9 +2,8 @@ package dominio
 
 import "math"
 
-// A "IA" do rival estima o dano de cada golpe com a mesma fórmula da batalha
-// (usando o fator aleatório médio) e decide com base na vantagem do confronto:
-// quanto do HP do oponente eu tiro por turno menos quanto ele tira do meu.
+// a IA do rival: estima o dano com a fórmula da batalha (fator médio)
+// e decide pela vantagem do confronto.
 
 const (
 	chanceProtegerDoFakeOut = 60 // %: rival usa Protect quando você ameaça Fake Out
@@ -15,7 +14,7 @@ const (
 	custoDeTrocar           = 0.15 // quem entra toma o golpe do turno
 )
 
-// sorteadorMedio dá sempre o meio do fator aleatório (0.925).
+// sempre o meio do fator aleatório (0.925).
 type sorteadorMedio struct{}
 
 func (sorteadorMedio) IntN(int) int     { return 0 }
@@ -26,7 +25,7 @@ func danoEsperado(a Acao, atk, alvo *Lutador, clima Clima, t TabelaTipos) float6
 	return float64(r.dano)
 }
 
-// melhorGolpe devolve o golpe de ataque com maior dano esperado.
+// golpe com maior dano esperado.
 func melhorGolpe(atk, alvo *Lutador, clima Clima, t TabelaTipos) (Acao, float64) {
 	melhor, maiorDano := AcaoFisico, -1.0
 	for _, a := range golpesDisponiveis(atk) {
@@ -37,7 +36,7 @@ func melhorGolpe(atk, alvo *Lutador, clima Clima, t TabelaTipos) (Acao, float64)
 	return melhor, maiorDano
 }
 
-// vantagem vai de -1 (eu sou atropelado) a +1 (eu atropelo).
+// de -1 (sou atropelado) a +1 (atropelo).
 func vantagem(eu, op *Lutador, clima Clima, t TabelaTipos) float64 {
 	if eu.Desmaiado() || op.Desmaiado() {
 		return -1
@@ -59,21 +58,21 @@ func fakeOutAfeta(alvo *Lutador, t TabelaTipos) bool {
 	return mult > 0 && alvo.Habilidade != "inner-focus"
 }
 
-// EscolherJogadaCPU decide a ação do rival no turno.
+// decide a ação do rival.
 func EscolherJogadaCPU(b *Batalha, t TabelaTipos, s Sorteador) Escolha {
 	eu, op := b.CPU.atual(), b.Jogador.atual()
 
-	// 1. Fake Out no primeiro turno em campo, se funcionar no alvo.
+	// 1. Fake Out no primeiro turno, se funcionar no alvo.
 	if eu.PodeUsarFakeOut() && fakeOutAfeta(op, t) {
 		return Escolha{Acao: AcaoFakeOut}
 	}
 
-	// 2. Protect quando o jogador ameaça Fake Out.
+	// 2. Protect se o jogador ameaça Fake Out.
 	if op.PodeUsarFakeOut() && !eu.UsouProtect && fakeOutAfeta(eu, t) && s.IntN(100) < chanceProtegerDoFakeOut {
 		return Escolha{Acao: AcaoProtect}
 	}
 
-	// 3. Troca se o confronto está ruim e alguém do banco se sai bem melhor.
+	// 3. troca se o confronto está ruim e alguém do banco se sai melhor.
 	atual := vantagem(eu, op, b.Clima, t)
 	if atual < limiteConfrontoRuim {
 		melhorIdx, melhor := -1, atual
@@ -87,20 +86,19 @@ func EscolherJogadaCPU(b *Batalha, t TabelaTipos, s Sorteador) Escolha {
 		}
 	}
 
-	// 4. Às vezes se protege quando vai ser nocauteado antes de agir.
+	// 4. às vezes se protege se vai ser nocauteado antes de agir.
 	_, danoDele := melhorGolpe(op, eu, b.Clima, t)
 	if !eu.UsouProtect && danoDele >= float64(eu.HP) && velocidadeEfetiva(op) > velocidadeEfetiva(eu) &&
 		s.IntN(100) < chanceProtegerDoNocaute {
 		return Escolha{Acao: AcaoProtect}
 	}
 
-	// 5. Senão, o golpe que mais machuca.
+	// 5. senão, o golpe que mais machuca.
 	golpe, _ := melhorGolpe(eu, op, b.Clima, t)
 	return Escolha{Acao: golpe}
 }
 
-// EscolherSubstitutoCPU escolhe, depois de um desmaio, quem do banco tem o
-// melhor confronto contra o Pokémon do jogador.
+// após um desmaio, quem do banco tem o melhor confronto.
 func EscolherSubstitutoCPU(b *Batalha, t TabelaTipos) int {
 	op := b.Jogador.atual()
 	melhorIdx, melhor := -1, math.Inf(-1)

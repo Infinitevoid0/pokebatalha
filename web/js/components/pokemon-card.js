@@ -1,12 +1,10 @@
-// Card de Pokémon reutilizável (coleção, seleção de time, revelação do gacha)
-// e o modal com os detalhes completos.
+// card de Pokémon (coleção, time, gacha) e modal de detalhes.
 import { exibir, escapar, sinal, html } from '../utils.js';
 import { imgPokemon } from '../sprites.js';
 import { tiposHTML } from './tipo-badge.js';
 import { tierBadge } from './tier-badge.js';
 
-// Junta itens repetidos da coleção (mesma espécie) e conta quantos há.
-// A API já devolve do mais forte ao mais fraco; a ordem é mantida.
+// agrupa repetidos e conta; mantém a ordem da API (mais forte primeiro).
 export function agruparColecao(pokemons = []) {
   const grupos = new Map();
   for (const p of pokemons) {
@@ -58,7 +56,7 @@ export function composicaoHTML(poder) {
   return `<p class="composicao">PODER <b>${poder.total}</b> = ${partes.join(' + ')}</p>`;
 }
 
-// Bloco com sprite grande, badges, habilidade, composição do poder e stats.
+// sprite grande, badges, habilidade, poder e stats.
 export function detalhesPokemon(item, { tamanhoSprite = 96 } = {}) {
   const d = item.detalhes;
   const el = html(`

@@ -1,5 +1,4 @@
-// Package dominio contém os tipos e regras do catálogo, sem dependência
-// de banco, HTTP ou gRPC.
+// tipos e regras do catálogo, sem banco, HTTP ou gRPC.
 package dominio
 
 import (
@@ -8,10 +7,10 @@ import (
 	"slices"
 )
 
-// MaiorIDNacional é o último número da Pokédex nacional (até a 9ª geração).
+// último número da Pokédex nacional (9ª geração).
 const MaiorIDNacional = 1025
 
-// Erros de negócio: o pedido do cliente é que está errado ou não existe.
+// erros de negócio: o pedido do cliente está errado ou não existe.
 var (
 	ErrIDInvalido           = errors.New("id de pokémon inválido")
 	ErrTierInvalido         = errors.New("tier inválido")
@@ -19,18 +18,16 @@ var (
 	ErrPokemonNaoEncontrado = errors.New("pokémon não encontrado")
 )
 
-// Erros de infraestrutura: algo fora do nosso controle falhou.
+// erros de infraestrutura: algo fora do nosso controle falhou.
 var (
 	ErrServicoExternoIndisponivel = errors.New("serviço externo indisponível")
-	// ErrCatalogoAquecendo: ainda não há Pokémon suficientes no cache para
-	// sortear um tier (o catálogo está baixando a Pokédex da PokeAPI).
+	// cache ainda sem Pokémon do tier (baixando a Pokédex).
 	ErrCatalogoAquecendo = errors.New("catálogo ainda está carregando a Pokédex")
-	// ErrForaDoCache indica que o registro ainda não está no banco local
-	// (não é erro para o cliente: o serviço busca na PokeAPI).
+	// fora do banco local; não é erro para o cliente, busca na PokeAPI.
 	ErrForaDoCache = errors.New("registro não está no cache")
 )
 
-// Tier é a raridade do Pokémon no gacha, calculada pelo índice de poder.
+// raridade no gacha, pelo índice de poder.
 type Tier string
 
 const (
@@ -40,10 +37,10 @@ const (
 	TierLendario Tier = "lendario"
 )
 
-// Tiers lista os tiers do mais comum ao mais raro.
+// do mais comum ao mais raro.
 var Tiers = []Tier{TierComum, TierRaro, TierEpico, TierLendario}
 
-// ParseTier valida o texto recebido do cliente.
+// valida o tier vindo do cliente.
 func ParseTier(s string) (Tier, error) {
 	t := Tier(s)
 	if !slices.Contains(Tiers, t) {
@@ -52,7 +49,7 @@ func ParseTier(s string) (Tier, error) {
 	return t, nil
 }
 
-// Status são os atributos base do Pokémon.
+// atributos base.
 type Status struct {
 	HP             int `json:"hp"`
 	Ataque         int `json:"ataque"`
@@ -62,7 +59,7 @@ type Status struct {
 	Velocidade     int `json:"velocidade"`
 }
 
-// Pokemon é a forma como o catálogo representa um Pokémon do jogo.
+// um Pokémon como o catálogo representa.
 type Pokemon struct {
 	ID             int      `json:"id"`
 	Nome           string   `json:"nome"`

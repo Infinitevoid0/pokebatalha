@@ -1,4 +1,4 @@
-// Package httpapi expõe o catálogo via REST.
+// expõe o catálogo via REST.
 package httpapi
 
 import (
@@ -14,7 +14,7 @@ import (
 	"pokebatalha/services/catalogo/internal/dominio"
 )
 
-// Servico é o que o handler precisa da camada de negócio.
+// o que o handler precisa do negócio.
 type Servico interface {
 	BuscarPorID(ctx context.Context, id int) (dominio.Pokemon, error)
 	BuscarPorNome(ctx context.Context, nome string) (dominio.Pokemon, error)
@@ -23,18 +23,16 @@ type Servico interface {
 	Regras() dominio.Regras
 }
 
-// Handler agrupa as rotas REST do catálogo.
+// rotas REST do catálogo.
 type Handler struct {
 	svc Servico
 	log *slog.Logger
 }
 
-// Novo cria o handler.
 func Novo(svc Servico, log *slog.Logger) *Handler {
 	return &Handler{svc: svc, log: log}
 }
 
-// Rotas registra os endpoints.
 func (h *Handler) Rotas() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /saude", h.saude)
@@ -49,7 +47,7 @@ func (h *Handler) saude(w http.ResponseWriter, _ *http.Request) {
 	httpjson.Escrever(w, http.StatusOK, map[string]string{"status": "ok"})
 }
 
-// GET /pokemons/{idOuNome} — aceita número (727) ou nome (incineroar).
+// busca por número ou nome: GET /pokemons/{idOuNome}
 func (h *Handler) buscar(w http.ResponseWriter, r *http.Request) {
 	chave := r.PathValue("idOuNome")
 
@@ -69,7 +67,7 @@ func (h *Handler) buscar(w http.ResponseWriter, r *http.Request) {
 	httpjson.Escrever(w, http.StatusOK, p)
 }
 
-// GET /pokemons/sorteio?tier=raro&poder=350 (poder é opcional)
+// sorteio: GET /pokemons/sorteio?tier=raro&poder=350 (poder opcional)
 func (h *Handler) sortear(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	tier, err := dominio.ParseTier(q.Get("tier"))
@@ -92,7 +90,7 @@ func (h *Handler) sortear(w http.ResponseWriter, r *http.Request) {
 	httpjson.Escrever(w, http.StatusOK, p)
 }
 
-// GET /tipos/efetividade?ataque=fire&defensor=grass,steel
+// efetividade: GET /tipos/efetividade?ataque=fire&defensor=grass,steel
 func (h *Handler) efetividade(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	ataque := q.Get("ataque")
@@ -113,15 +111,15 @@ func (h *Handler) efetividade(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// GET /tiers — fórmula do índice de poder e cortes de cada tier.
+// fórmula e cortes de tier: GET /tiers
 func (h *Handler) listarTiers(w http.ResponseWriter, _ *http.Request) {
 	httpjson.Escrever(w, http.StatusOK, h.svc.Regras())
 }
 
-// responderErro traduz o erro da camada de negócio para o status HTTP certo.
+// erro de negócio/infra -> status HTTP.
 func (h *Handler) responderErro(w http.ResponseWriter, r *http.Request, err error) {
 	switch {
-	// Erro de negócio: o cliente pediu algo inválido ou inexistente.
+	// negócio: pedido inválido ou inexistente.
 	case errors.Is(err, dominio.ErrIDInvalido),
 		errors.Is(err, dominio.ErrTierInvalido),
 		errors.Is(err, dominio.ErrTipoInvalido):
@@ -129,17 +127,17 @@ func (h *Handler) responderErro(w http.ResponseWriter, r *http.Request, err erro
 	case errors.Is(err, dominio.ErrPokemonNaoEncontrado):
 		httpjson.EscreverErro(w, http.StatusNotFound, "pokemon_nao_encontrado", err.Error())
 
-	// O cache ainda não tem Pokémon desse tier: vale tentar de novo logo.
+	// cache ainda sem o tier: tente de novo logo.
 	case errors.Is(err, dominio.ErrCatalogoAquecendo):
 		httpjson.EscreverErro(w, http.StatusServiceUnavailable, "catalogo_aquecendo", err.Error())
 
-	// Erro de infraestrutura: a PokeAPI caiu, deu timeout ou respondeu lixo.
+	// infra: PokeAPI caiu, deu timeout ou respondeu lixo.
 	case errors.Is(err, dominio.ErrServicoExternoIndisponivel):
 		h.log.Error("falha na PokeAPI", "caminho", r.URL.Path, "erro", err)
 		httpjson.EscreverErro(w, http.StatusBadGateway, "servico_externo_indisponivel",
 			"a PokeAPI não respondeu, tente de novo em instantes")
 
-	// Qualquer outra coisa (banco fora do ar, bug): não vaza detalhe para o cliente.
+	// resto (banco fora, bug): não vaza detalhe para o cliente.
 	default:
 		h.log.Error("erro interno", "caminho", r.URL.Path, "erro", err)
 		httpjson.EscreverErro(w, http.StatusInternalServerError, "erro_interno", "erro interno do servidor")

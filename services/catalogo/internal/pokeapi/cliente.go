@@ -1,6 +1,4 @@
-// Package pokeapi é o client REST da PokeAPI (https://pokeapi.co), a API
-// externa do projeto. Toda chamada tem timeout, fecha o Body e confere o
-// StatusCode antes de considerar a resposta válida.
+// client REST da PokeAPI: timeout, fecha o Body e confere o StatusCode.
 package pokeapi
 
 import (
@@ -17,17 +15,17 @@ import (
 	"pokebatalha/services/catalogo/internal/dominio"
 )
 
-// A resposta de /pokemon traz a lista de golpes inteira, então pode ser grande.
+// /pokemon traz todos os golpes, então a resposta pode ser grande.
 const tamanhoMaximoResposta = 10 << 20 // 10 MB
 
-// Cliente faz as chamadas HTTP para a PokeAPI.
+// chamadas HTTP para a PokeAPI.
 type Cliente struct {
 	urlBase string
 	http    *http.Client
 	timeout time.Duration
 }
 
-// NovoCliente cria o client. timeout vale para cada chamada individual.
+// o timeout vale por chamada.
 func NovoCliente(urlBase string, timeout time.Duration) *Cliente {
 	return &Cliente{
 		urlBase: strings.TrimRight(urlBase, "/"),
@@ -36,10 +34,10 @@ func NovoCliente(urlBase string, timeout time.Duration) *Cliente {
 	}
 }
 
-// errNaoEncontrado é traduzido para o erro de negócio certo por quem chama.
+// quem chama traduz para o erro de negócio certo.
 var errNaoEncontrado = errors.New("recurso não existe na PokeAPI")
 
-// obterJSON faz GET em urlBase+caminho e decodifica o JSON em destino.
+// faz GET em urlBase+caminho e decodifica o JSON.
 func (c *Cliente) obterJSON(ctx context.Context, caminho string, destino any) error {
 	ctx, cancelar := context.WithTimeout(ctx, c.timeout)
 	defer cancelar()
@@ -53,7 +51,7 @@ func (c *Cliente) obterJSON(ctx context.Context, caminho string, destino any) er
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		// Timeout, DNS, conexão recusada: tudo isso é infraestrutura.
+		// timeout, DNS, conexão recusada: infraestrutura.
 		return fmt.Errorf("%w: PokeAPI: %v", dominio.ErrServicoExternoIndisponivel, err)
 	}
 	defer resp.Body.Close()
@@ -62,7 +60,7 @@ func (c *Cliente) obterJSON(ctx context.Context, caminho string, destino any) er
 	case resp.StatusCode == http.StatusNotFound:
 		return errNaoEncontrado
 	case resp.StatusCode != http.StatusOK:
-		// Descarta o corpo para a conexão poder ser reaproveitada.
+		// descarta o corpo para reaproveitar a conexão.
 		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, tamanhoMaximoResposta))
 		return fmt.Errorf("%w: PokeAPI respondeu status %d", dominio.ErrServicoExternoIndisponivel, resp.StatusCode)
 	}
@@ -97,7 +95,7 @@ type respostaPokemon struct {
 	} `json:"moves"`
 }
 
-// BuscarPokemon busca /pokemon/{idOuNome}.
+// busca /pokemon/{idOuNome}.
 func (c *Cliente) BuscarPokemon(ctx context.Context, idOuNome string) (dominio.Pokemon, error) {
 	var r respostaPokemon
 	if err := c.obterJSON(ctx, "/pokemon/"+idOuNome, &r); err != nil {
@@ -154,7 +152,7 @@ type respostaTipo struct {
 	} `json:"damage_relations"`
 }
 
-// BuscarTipo busca /type/{nome}.
+// busca /type/{nome}.
 func (c *Cliente) BuscarTipo(ctx context.Context, nome string) (dominio.RelacaoTipo, error) {
 	var r respostaTipo
 	if err := c.obterJSON(ctx, "/type/"+nome, &r); err != nil {

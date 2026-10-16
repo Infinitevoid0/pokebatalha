@@ -1,5 +1,4 @@
-// Package catalogo é o client gRPC que o serviço de jogadores usa para
-// falar com o microsserviço de catálogo.
+// client gRPC do catálogo.
 package catalogo
 
 import (
@@ -16,16 +15,16 @@ import (
 	"pokebatalha/services/jogadores/internal/dominio"
 )
 
-// tamanhoLote é o máximo de IDs que o catálogo aceita por chamada.
+// máximo de IDs por chamada ao catálogo.
 const tamanhoLote = 50
 
-// Cliente implementa servico.Catalogo sobre gRPC.
+// catálogo via gRPC.
 type Cliente struct {
 	api     catalogov1.CatalogoClient
 	timeout time.Duration
 }
 
-// Conectar abre a conexão gRPC. Quem chama deve fechar a *grpc.ClientConn.
+// quem chama fecha a conexão.
 func Conectar(endereco string, timeout time.Duration) (*Cliente, *grpc.ClientConn, error) {
 	conn, err := grpc.NewClient(endereco, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -34,7 +33,7 @@ func Conectar(endereco string, timeout time.Duration) (*Cliente, *grpc.ClientCon
 	return &Cliente{api: catalogov1.NewCatalogoClient(conn), timeout: timeout}, conn, nil
 }
 
-// SortearPokemon pede ao catálogo um Pokémon aleatório do tier.
+// pede um Pokémon aleatório do tier.
 func (c *Cliente) SortearPokemon(ctx context.Context, tier string) (dominio.PokemonSorteado, error) {
 	ctx, cancelar := context.WithTimeout(ctx, c.timeout)
 	defer cancelar()
@@ -46,7 +45,7 @@ func (c *Cliente) SortearPokemon(ctx context.Context, tier string) (dominio.Poke
 	return dominio.PokemonSorteado{PokemonID: int(p.GetId()), Nome: p.GetNome(), Detalhes: detalhes(p)}, nil
 }
 
-// BuscarDetalhes devolve os dados atuais de cada Pokémon, por ID.
+// dados atuais de cada Pokémon, por ID.
 func (c *Cliente) BuscarDetalhes(ctx context.Context, ids []int) (map[int]dominio.Detalhes, error) {
 	resultado := make(map[int]dominio.Detalhes, len(ids))
 	for inicio := 0; inicio < len(ids); inicio += tamanhoLote {
@@ -93,11 +92,11 @@ func detalhes(p *catalogov1.Pokemon) dominio.Detalhes {
 	}
 }
 
-// traduzirErro converte o status gRPC em erro do domínio deste serviço.
+// status gRPC -> erro do domínio.
 func traduzirErro(err error) error {
 	switch status.Code(err) {
 	case codes.Unavailable, codes.DeadlineExceeded:
-		// Catálogo fora do ar, ou a PokeAPI atrás dele: infraestrutura.
+		// catálogo (ou PokeAPI atrás dele) fora: infraestrutura.
 		return fmt.Errorf("%w: catálogo: %v", dominio.ErrServicoIndisponivel, err)
 	default:
 		return fmt.Errorf("catálogo respondeu erro inesperado: %w", err)

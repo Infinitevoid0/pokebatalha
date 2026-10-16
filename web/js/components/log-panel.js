@@ -1,5 +1,4 @@
-// Painel de log da batalha: cada linha é digitada (typewriter) e o painel
-// rola sozinho. Clicar no painel acelera a animação.
+// log da batalha digitado linha a linha; clicar acelera.
 import { espera } from '../utils.js';
 
 export function criarLogPanel() {
@@ -28,7 +27,7 @@ export function criarLogPanel() {
       el.scrollTop = el.scrollHeight;
       if (!rapido) await espera(260);
     },
-    // Volta à velocidade normal no começo de cada turno.
+    // velocidade normal a cada turno.
     reiniciarVelocidade() { rapido = false; },
     seta(mostrar) { el.querySelector('.seta').hidden = !mostrar; },
   };

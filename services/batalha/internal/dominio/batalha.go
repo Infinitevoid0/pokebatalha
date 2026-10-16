@@ -5,13 +5,13 @@ import (
 	"slices"
 )
 
-// Sorteador permite trocar a aleatoriedade por algo previsível nos testes.
+// permite um sorteio previsível nos testes.
 type Sorteador interface {
 	IntN(n int) int
 	Float64() float64
 }
 
-// StatusBatalha indica se a batalha continua ou quem venceu.
+// em andamento ou quem venceu.
 type StatusBatalha string
 
 const (
@@ -20,7 +20,7 @@ const (
 	Derrota     StatusBatalha = "derrota"
 )
 
-// Clima afeta golpes de Fogo e Água.
+// afeta golpes de fogo e água.
 type Clima string
 
 const (
@@ -34,7 +34,7 @@ const (
 	TamanhoMaximoTime = 3
 )
 
-// Lado é o time de um dos jogadores e qual Pokémon está em campo.
+// time de um lado e quem está em campo.
 type Lado struct {
 	Time  []Lutador `json:"time"`
 	Ativo int       `json:"ativo"`
@@ -42,7 +42,7 @@ type Lado struct {
 
 func (l *Lado) atual() *Lutador { return &l.Time[l.Ativo] }
 
-// TrocasDisponiveis lista os índices do banco que podem entrar.
+// índices do banco que podem entrar.
 func (l *Lado) TrocasDisponiveis() []int {
 	trocas := []int{}
 	for i := range l.Time {
@@ -53,7 +53,7 @@ func (l *Lado) TrocasDisponiveis() []int {
 	return trocas
 }
 
-// Batalha é o estado completo de uma partida.
+// estado completo da partida.
 type Batalha struct {
 	ID          int64         `json:"id"`
 	JogadorID   int64         `json:"jogador_id"`
@@ -63,15 +63,14 @@ type Batalha struct {
 	TurnosClima int           `json:"turnos_clima,omitempty"`
 	Jogador     Lado          `json:"jogador"`
 	CPU         Lado          `json:"cpu"`
-	// PrecisaTrocar: o Pokémon do jogador desmaiou e ele escolhe quem entra
-	// (a troca forçada não gasta turno e o rival não age).
+	// jogador desmaiou e escolhe quem entra (não gasta turno, o rival não age).
 	PrecisaTrocar bool     `json:"precisa_trocar"`
-	Log           []string `json:"log"` // o que aconteceu no último turno
+	Log           []string `json:"log"` // eventos do último turno
 	Recompensa    int      `json:"recompensa,omitempty"`
 	Versao        int      `json:"-"`
 }
 
-// combatente junta o lutador com o nome que aparece no log.
+// lutador + nome mostrado no log.
 type combatente struct {
 	l    *Lutador
 	nome string
@@ -98,8 +97,7 @@ func (b *Batalha) registrar(formato string, args ...any) {
 	b.Log = append(b.Log, fmt.Sprintf(formato, args...))
 }
 
-// NovaBatalha monta a partida e ativa as habilidades de entrada dos dois
-// primeiros Pokémon (o mais rápido primeiro).
+// monta a partida e ativa as habilidades de entrada (mais rápido primeiro).
 func NovaBatalha(jogadorID int64, timeJogador, timeCPU []Lutador, s Sorteador) (*Batalha, error) {
 	if len(timeJogador) == 0 || len(timeJogador) > TamanhoMaximoTime || len(timeCPU) == 0 {
 		return nil, fmt.Errorf("%w: o time precisa ter de 1 a %d pokémon", ErrTimeInvalido, TamanhoMaximoTime)
@@ -131,7 +129,7 @@ func maisRapido(a, c *Lutador, s Sorteador) bool {
 	return s.IntN(2) == 0 // empate: cara ou coroa
 }
 
-// AcoesDoJogador lista o que o jogador pode fazer agora.
+// o que o jogador pode fazer agora.
 func (b *Batalha) AcoesDoJogador() []Acao {
 	if b.Status != EmAndamento {
 		return []Acao{}
@@ -169,17 +167,15 @@ func validarEscolha(lado *Lado, e Escolha) error {
 	return nil
 }
 
-// jogada é a escolha de um dos lados dentro do turno. O lutador que age é
-// resolvido na hora de agir, porque uma troca antes pode ter mudado quem
-// está em campo.
+// escolha de um lado no turno; o lutador é resolvido na hora de agir
+// (uma troca antes pode ter mudado quem está em campo).
 type jogada struct {
 	lado    *Lado
 	escolha Escolha
 	recuou  bool
 }
 
-// ExecutarTurno resolve um turno inteiro: escolha do jogador, escolha da CPU,
-// efeitos de fim de turno e substituição de quem desmaiou.
+// resolve o turno: jogador, CPU, fim de turno e substituições.
 func (b *Batalha) ExecutarTurno(e Escolha, t TabelaTipos, s Sorteador) error {
 	if b.Status != EmAndamento {
 		return ErrBatalhaEncerrada
@@ -234,7 +230,7 @@ func (b *Batalha) ExecutarTurno(e Escolha, t TabelaTipos, s Sorteador) error {
 	return nil
 }
 
-// trocaForcada coloca em campo o Pokémon escolhido depois de um desmaio.
+// põe em campo quem o jogador escolheu após um desmaio.
 func (b *Batalha) trocaForcada(e Escolha) error {
 	trocas := b.Jogador.TrocasDisponiveis()
 	if e.Acao != AcaoTrocar || !slices.Contains(trocas, e.Alvo) {
@@ -260,7 +256,7 @@ func prioridade(a Acao) int {
 	}
 }
 
-// agePrimeiro: maior prioridade vence; empatou, vence o mais rápido.
+// maior prioridade age antes; empate vai para o mais rápido.
 func agePrimeiro(a, c *jogada, s Sorteador) bool {
 	if pa, pc := prioridade(a.escolha.Acao), prioridade(c.escolha.Acao); pa != pc {
 		return pa > pc
@@ -268,8 +264,7 @@ func agePrimeiro(a, c *jogada, s Sorteador) bool {
 	return maisRapido(a.lado.atual(), c.lado.atual(), s)
 }
 
-// trocar tira o Pokémon atual e coloca o do índice alvo. Quem sai perde os
-// estágios (inclusive o -1 do Intimidate); quem entra ativa a habilidade.
+// troca o Pokémon; quem sai perde os estágios, quem entra ativa a habilidade.
 func (b *Batalha) trocar(lado *Lado, alvo int, noMeioDoTurno bool) {
 	sai, _ := b.daqueleLado(lado)
 	sai.l.EstagioAtaque, sai.l.EstagioVelocidade = 0, 0
@@ -293,7 +288,7 @@ func (b *Batalha) trocar(lado *Lado, alvo int, noMeioDoTurno bool) {
 	b.aoEntrar(entra, oponente)
 }
 
-// executarGolpe aplica o dano e registra o resultado. Devolve se acertou.
+// aplica o dano e registra; devolve se acertou.
 func (b *Batalha) executarGolpe(atk, alvo combatente, acao Acao, t TabelaTipos, s Sorteador) bool {
 	g := golpeDe(acao, atk.l)
 	b.registrar("%s usou %s!", atk.nome, g.nome)
@@ -334,7 +329,7 @@ func (b *Batalha) executarGolpe(atk, alvo combatente, acao Acao, t TabelaTipos, 
 	return true
 }
 
-// aoEntrar ativa as habilidades que disparam quando o Pokémon entra em campo.
+// habilidades que disparam ao entrar em campo.
 func (b *Batalha) aoEntrar(c, oponente combatente) {
 	switch c.l.Habilidade {
 	case "intimidate":
@@ -394,8 +389,7 @@ func (b *Batalha) fimDeTurno() {
 			continue
 		}
 		if c.l.recemChegado {
-			// Entrou por troca neste turno: o próximo é o "primeiro turno"
-			// dele em campo (dá para usar Fake Out).
+			// entrou por troca: o próximo turno conta como o primeiro (libera Fake Out).
 			c.l.recemChegado = false
 			continue
 		}
@@ -414,8 +408,8 @@ func (b *Batalha) fimDeTurno() {
 	}
 }
 
-// substituirDesmaiados: o rival escolhe o melhor substituto; o jogador
-// escolhe o dele (se só sobrar um, ele entra sozinho). Sem ninguém, acabou.
+// o rival escolhe o melhor substituto; o jogador escolhe o dele
+// (se sobrar um, entra sozinho). sem ninguém, acabou.
 func (b *Batalha) substituirDesmaiados(t TabelaTipos) {
 	if b.CPU.atual().Desmaiado() {
 		trocas := b.CPU.TrocasDisponiveis()

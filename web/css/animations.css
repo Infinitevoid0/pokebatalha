@@ -44,7 +44,7 @@
 
 @keyframes tremer-leve { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(1px, -1px); } }
 
-/* Efeitos de batalha */
+/* efeitos de batalha */
 @keyframes flash-dano { 0%, 100% { filter: none; } 25%, 75% { filter: brightness(2.5) saturate(0); } 50% { filter: none; } }
 .fx-dano { animation: flash-dano .45s steps(4); }
 
@@ -76,7 +76,7 @@
 .fx-ataca.lado-jogador .sprite-batalha { animation: ataque-frente .3s steps(3); }
 .fx-ataca.lado-rival .sprite-batalha   { animation: ataque-tras .3s steps(3); }
 
-/* Confete de vitória */
+/* confete de vitória */
 @keyframes cair { to { transform: translateY(110vh) rotate(720deg); } }
 .confete {
   position: fixed; top: -12px;

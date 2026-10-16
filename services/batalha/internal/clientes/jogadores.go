@@ -13,13 +13,13 @@ import (
 	"pokebatalha/services/batalha/internal/dominio"
 )
 
-// Jogadores implementa servico.Jogadores sobre gRPC.
+// jogadores via gRPC.
 type Jogadores struct {
 	api     jogadoresv1.JogadoresClient
 	timeout time.Duration
 }
 
-// ConectarJogadores abre a conexão. Quem chama deve fechar a *grpc.ClientConn.
+// quem chama fecha a conexão.
 func ConectarJogadores(endereco string, timeout time.Duration) (*Jogadores, *grpc.ClientConn, error) {
 	conn, err := conectar(endereco)
 	if err != nil {
@@ -28,7 +28,7 @@ func ConectarJogadores(endereco string, timeout time.Duration) (*Jogadores, *grp
 	return &Jogadores{api: jogadoresv1.NewJogadoresClient(conn), timeout: timeout}, conn, nil
 }
 
-// ValidarTime confere se o jogador possui os Pokémon escolhidos.
+// confere se o jogador tem os Pokémon do time.
 func (j *Jogadores) ValidarTime(ctx context.Context, jogadorID int64, pokemonIDs []int) error {
 	ctx, cancelar := context.WithTimeout(ctx, j.timeout)
 	defer cancelar()
@@ -44,7 +44,7 @@ func (j *Jogadores) ValidarTime(ctx context.Context, jogadorID int64, pokemonIDs
 	return nil
 }
 
-// CreditarMoedas paga a recompensa da vitória.
+// paga a recompensa da vitória.
 func (j *Jogadores) CreditarMoedas(ctx context.Context, jogadorID int64, quantidade int) (int, error) {
 	ctx, cancelar := context.WithTimeout(ctx, j.timeout)
 	defer cancelar()

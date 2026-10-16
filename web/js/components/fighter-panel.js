@@ -1,5 +1,4 @@
-// Painel de um lado da batalha: sprite na arena + caixa de status
-// (nome, nível, tier, tipos, habilidade, HP e estágios).
+// painel de um lado da batalha: sprite e caixa de status.
 import { exibir, escapar, sinal } from '../utils.js';
 import { imgPokemon } from '../sprites.js';
 import { tiposHTML } from './tipo-badge.js';
@@ -19,7 +18,7 @@ export function criarFighterPanel(lado) {
   return el;
 }
 
-// Redesenha o painel com o lutador ativo do lado.
+// redesenha com o lutador ativo.
 export function desenharFighter(el, ladoBatalha, { comTime = true } = {}) {
   const l = ladoBatalha.time[ladoBatalha.ativo];
   const rival = el.classList.contains('lado-rival');
@@ -53,7 +52,7 @@ export function desenharFighter(el, ladoBatalha, { comTime = true } = {}) {
   }));
 }
 
-// Atualiza só o HP (com animação), sem redesenhar o resto.
+// atualiza só o HP, com animação.
 export function atualizarHPFighter(el, hp, max) {
   const barra = el.querySelector('.hp');
   if (barra) atualizarHPBar(barra, hp, max, true);

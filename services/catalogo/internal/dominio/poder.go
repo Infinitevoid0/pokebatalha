@@ -1,14 +1,13 @@
 package dominio
 
-// O índice de poder é a soma de quatro pesos, todos na mesma escala:
+// índice de poder = soma de quatro pesos na mesma escala:
 //
-//	stats      HP + maior ataque + média das defesas + velocidade (o que a batalha usa)
-//	tipagem    cobertura ofensiva dos seus tipos + resistência defensiva da combinação
-//	habilidade peso da habilidade mais forte que o Pokémon tem (das que a batalha implementa)
+//	stats      HP + maior ataque + média das defesas + velocidade
+//	tipagem    cobertura ofensiva + resistência defensiva
+//	habilidade peso da melhor habilidade implementada
 //	fake out   bônus fixo para quem aprende o golpe
 //
-// O tier sai do total. Os cortes foram calibrados com os 1025 Pokémon da
-// PokeAPI para dar ~42% comum, ~27% raro, ~20% épico e ~10% lendário.
+// cortes calibrados nos 1025 Pokémon: ~42% comum, ~27% raro, ~20% épico, ~10% lendário.
 const (
 	CorteRaro     = 300
 	CorteEpico    = 370
@@ -19,8 +18,7 @@ const (
 	PesoFakeOut   = 20
 )
 
-// PesosHabilidade valoriza as habilidades implementadas na batalha.
-// Habilidades fora da lista não têm efeito no jogo, então valem 0.
+// peso das habilidades implementadas; as outras valem 0.
 var PesosHabilidade = map[string]int{
 	"huge-power": 70, "pure-power": 70,
 	"intimidate": 45, "orichalcum-pulse": 45,
@@ -36,7 +34,7 @@ var PesosHabilidade = map[string]int{
 	"clear-body": 10, "white-smoke": 10, "full-metal-body": 10, "inner-focus": 10,
 }
 
-// Poder é o índice de força do Pokémon, com a conta aberta.
+// índice de força com a conta aberta.
 type Poder struct {
 	Total           int    `json:"total"`
 	Stats           int    `json:"stats"`
@@ -47,7 +45,7 @@ type Poder struct {
 	HabilidadeAtiva string `json:"habilidade_ativa,omitempty"`
 }
 
-// Tabela responde a efetividade de um tipo atacante contra os tipos do defensor.
+// efetividade de um tipo atacante contra o defensor.
 type Tabela map[string]RelacaoTipo
 
 func (t Tabela) multiplicador(ataque string, defensor []string) float64 {
@@ -58,8 +56,7 @@ func (t Tabela) multiplicador(ataque string, defensor []string) float64 {
 	return rel.Multiplicador(defensor)
 }
 
-// HabilidadeAtiva escolhe a habilidade de maior peso; empate fica com a
-// que vem primeiro na lista do Pokémon. Devolve "" se nenhuma tiver efeito.
+// habilidade de maior peso (empate: a primeira); "" se nenhuma.
 func HabilidadeAtiva(habilidades []string) string {
 	melhor, pesoMelhor := "", 0
 	for _, h := range habilidades {
@@ -70,7 +67,7 @@ func HabilidadeAtiva(habilidades []string) string {
 	return melhor
 }
 
-// CalcularPoder monta o índice de poder a partir dos dados do Pokémon.
+// monta o índice de poder do Pokémon.
 func CalcularPoder(p Pokemon, t Tabela) Poder {
 	s := p.Status
 	stats := s.HP + max(s.Ataque, s.AtaqueEspecial) + (s.Defesa+s.DefesaEspecial)/2 + s.Velocidade
@@ -90,9 +87,7 @@ func CalcularPoder(p Pokemon, t Tabela) Poder {
 	return poder
 }
 
-// tipagemOfensiva: para cada um dos 18 tipos defensores, o melhor
-// multiplicador entre os golpes do Pokémon (um por tipo). Média acima de 1
-// significa boa cobertura.
+// melhor multiplicador contra cada um dos 18 tipos; média > 1 = boa cobertura.
 func tipagemOfensiva(tipos []string, t Tabela) int {
 	if len(tipos) == 0 {
 		return 0
@@ -109,8 +104,7 @@ func tipagemOfensiva(tipos []string, t Tabela) int {
 	return arredondar((media - 1) * pesoOfensivo)
 }
 
-// tipagemDefensiva: dano médio recebido dos 18 tipos atacantes. Média abaixo
-// de 1 (muitas resistências e imunidades) vale pontos; acima, perde.
+// dano médio recebido dos 18 tipos; abaixo de 1 ganha pontos, acima perde.
 func tipagemDefensiva(tipos []string, t Tabela) int {
 	if len(tipos) == 0 {
 		return 0
@@ -130,7 +124,7 @@ func arredondar(x float64) int {
 	return int(x + 0.5)
 }
 
-// TierPorPoder converte o índice no tier do gacha.
+// índice -> tier do gacha.
 func TierPorPoder(total int) Tier {
 	switch {
 	case total >= CorteLendario:
@@ -144,7 +138,7 @@ func TierPorPoder(total int) Tier {
 	}
 }
 
-// Regras descreve a fórmula para quem consulta a API.
+// fórmula exposta pela API.
 type Regras struct {
 	Formula         string         `json:"formula"`
 	Cortes          map[Tier]int   `json:"cortes"`
@@ -152,7 +146,7 @@ type Regras struct {
 	PesosHabilidade map[string]int `json:"pesos_habilidade"`
 }
 
-// RegrasDoPoder devolve a fórmula e os cortes em vigor.
+// fórmula e cortes em vigor.
 func RegrasDoPoder() Regras {
 	return Regras{
 		Formula: "poder = stats (HP + maior ataque + média das defesas + velocidade) " +

@@ -1,5 +1,4 @@
-// Package clientes contém os clients gRPC que a batalha usa para falar
-// com os microsserviços de catálogo e de jogadores.
+// clients gRPC do catálogo e de jogadores.
 package clientes
 
 import (
@@ -24,8 +23,7 @@ func conectar(endereco string) (*grpc.ClientConn, error) {
 	return conn, nil
 }
 
-// erroDeInfra devolve um erro de infraestrutura se o código gRPC indicar
-// serviço fora do ar ou timeout; caso contrário devolve nil.
+// erro de infra se o código gRPC for de serviço fora ou timeout; senão nil.
 func erroDeInfra(servico string, err error) error {
 	switch status.Code(err) {
 	case codes.Unavailable, codes.DeadlineExceeded:
@@ -34,8 +32,7 @@ func erroDeInfra(servico string, err error) error {
 	return nil
 }
 
-// erroRemoto preserva a mensagem que o outro serviço mandou, mas responde a
-// errors.Is com o erro de domínio local (sem repetir o texto na mensagem).
+// mantém a mensagem remota, mas responde errors.Is com o erro local.
 type erroRemoto struct {
 	sentinela error
 	mensagem  string
@@ -48,13 +45,13 @@ func novoErroRemoto(sentinela, err error) error {
 	return &erroRemoto{sentinela: sentinela, mensagem: status.Convert(err).Message()}
 }
 
-// Catalogo implementa servico.Catalogo sobre gRPC.
+// catálogo via gRPC.
 type Catalogo struct {
 	api     catalogov1.CatalogoClient
 	timeout time.Duration
 }
 
-// ConectarCatalogo abre a conexão. Quem chama deve fechar a *grpc.ClientConn.
+// quem chama fecha a conexão.
 func ConectarCatalogo(endereco string, timeout time.Duration) (*Catalogo, *grpc.ClientConn, error) {
 	conn, err := conectar(endereco)
 	if err != nil {
@@ -63,7 +60,7 @@ func ConectarCatalogo(endereco string, timeout time.Duration) (*Catalogo, *grpc.
 	return &Catalogo{api: catalogov1.NewCatalogoClient(conn), timeout: timeout}, conn, nil
 }
 
-// BuscarPokemon pede os dados de um Pokémon pelo ID.
+// busca um Pokémon pelo ID.
 func (c *Catalogo) BuscarPokemon(ctx context.Context, id int) (dominio.Especie, error) {
 	ctx, cancelar := context.WithTimeout(ctx, c.timeout)
 	defer cancelar()
@@ -75,8 +72,7 @@ func (c *Catalogo) BuscarPokemon(ctx context.Context, id int) (dominio.Especie, 
 	return paraEspecie(p), nil
 }
 
-// SortearPokemon pede um Pokémon aleatório do tier com poder próximo do
-// informado (para montar o time da CPU equilibrado com o do jogador).
+// sorteia um Pokémon do tier com poder parecido (time da CPU).
 func (c *Catalogo) SortearPokemon(ctx context.Context, tier string, poder int) (dominio.Especie, error) {
 	ctx, cancelar := context.WithTimeout(ctx, c.timeout)
 	defer cancelar()
@@ -88,7 +84,7 @@ func (c *Catalogo) SortearPokemon(ctx context.Context, tier string, poder int) (
 	return paraEspecie(p), nil
 }
 
-// TabelaDeTipos pede as relações de dano dos 18 tipos.
+// relações de dano dos 18 tipos.
 func (c *Catalogo) TabelaDeTipos(ctx context.Context) (dominio.Tabela, error) {
 	ctx, cancelar := context.WithTimeout(ctx, c.timeout)
 	defer cancelar()

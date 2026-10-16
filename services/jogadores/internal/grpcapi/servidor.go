@@ -1,4 +1,4 @@
-// Package grpcapi expõe o serviço de jogadores para a batalha via gRPC.
+// jogadores via gRPC para a batalha.
 package grpcapi
 
 import (
@@ -13,20 +13,19 @@ import (
 	"pokebatalha/services/jogadores/internal/dominio"
 )
 
-// Servico é o que o servidor gRPC precisa da camada de negócio.
+// o que o servidor gRPC precisa do negócio.
 type Servico interface {
 	ValidarTime(ctx context.Context, id int64, pokemonIDs []int) error
 	CreditarMoedas(ctx context.Context, id int64, quantidade int) (int, error)
 }
 
-// Servidor implementa jogadoresv1.JogadoresServer.
+// implementa jogadoresv1.JogadoresServer.
 type Servidor struct {
 	jogadoresv1.UnimplementedJogadoresServer
 	svc Servico
 	log *slog.Logger
 }
 
-// Novo cria o servidor gRPC.
 func Novo(svc Servico, log *slog.Logger) *Servidor {
 	return &Servidor{svc: svc, log: log}
 }

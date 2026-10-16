@@ -1,4 +1,4 @@
-// Package httpapi expõe o serviço de jogadores via REST.
+// expõe jogadores via REST.
 package httpapi
 
 import (
@@ -14,7 +14,7 @@ import (
 	"pokebatalha/services/jogadores/internal/servico"
 )
 
-// Servico é o que o handler precisa da camada de negócio.
+// o que o handler precisa do negócio.
 type Servico interface {
 	CriarJogador(ctx context.Context, nome string) (dominio.Jogador, error)
 	BuscarJogador(ctx context.Context, id int64) (dominio.Jogador, error)
@@ -22,18 +22,16 @@ type Servico interface {
 	AbrirPacote(ctx context.Context, id int64) (servico.ResultadoPacote, error)
 }
 
-// Handler agrupa as rotas REST de jogadores.
+// rotas REST de jogadores.
 type Handler struct {
 	svc Servico
 	log *slog.Logger
 }
 
-// Novo cria o handler.
 func Novo(svc Servico, log *slog.Logger) *Handler {
 	return &Handler{svc: svc, log: log}
 }
 
-// Rotas registra os endpoints.
 func (h *Handler) Rotas() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /saude", func(w http.ResponseWriter, _ *http.Request) {
@@ -57,7 +55,7 @@ type requisicaoCriar struct {
 	Nome string `json:"nome"`
 }
 
-// POST /jogadores {"nome": "theo"}
+// cria conta: POST /jogadores {"nome": "theo"}
 func (h *Handler) criar(w http.ResponseWriter, r *http.Request) {
 	var req requisicaoCriar
 	if err := httpjson.Ler(r, &req); err != nil {
@@ -86,7 +84,7 @@ func (h *Handler) buscar(w http.ResponseWriter, r *http.Request) {
 	httpjson.Escrever(w, http.StatusOK, comPity(j))
 }
 
-// respostaJogador mostra o jogador com o pity já explicado.
+// jogador com o pity explicado.
 type respostaJogador struct {
 	dominio.Jogador
 	Pity dominio.InfoPity `json:"pity"`
@@ -110,7 +108,7 @@ func (h *Handler) colecao(w http.ResponseWriter, r *http.Request) {
 	httpjson.Escrever(w, http.StatusOK, c)
 }
 
-// POST /jogadores/{id}/pacotes — 201 porque cria um item novo na coleção.
+// abre pacote: POST /jogadores/{id}/pacotes (201: cria item na coleção)
 func (h *Handler) abrirPacote(w http.ResponseWriter, r *http.Request) {
 	id, err := idDaRota(r)
 	if err != nil {
@@ -135,10 +133,10 @@ func idDaRota(r *http.Request) (int64, error) {
 	return id, nil
 }
 
-// responderErro traduz o erro para o status HTTP certo.
+// erro -> status HTTP.
 func (h *Handler) responderErro(w http.ResponseWriter, r *http.Request, err error) {
 	switch {
-	// Erros de negócio.
+	// erros de negócio.
 	case errors.Is(err, httpjson.ErrCorpoInvalido),
 		errors.Is(err, errIDInvalido),
 		errors.Is(err, dominio.ErrNomeInvalido):
@@ -150,10 +148,10 @@ func (h *Handler) responderErro(w http.ResponseWriter, r *http.Request, err erro
 	case errors.Is(err, dominio.ErrCompraSimultanea):
 		httpjson.EscreverErro(w, http.StatusConflict, "compra_simultanea", err.Error())
 	case errors.Is(err, dominio.ErrSaldoInsuficiente):
-		// 422: a requisição é válida, mas a regra de negócio impede.
+		// 422: válido, mas a regra de negócio impede.
 		httpjson.EscreverErro(w, http.StatusUnprocessableEntity, "saldo_insuficiente", err.Error())
 
-	// Erro de infraestrutura: o catálogo (ou a PokeAPI atrás dele) não respondeu.
+	// infra: catálogo (ou PokeAPI) não respondeu.
 	case errors.Is(err, dominio.ErrServicoIndisponivel):
 		h.log.Error("dependência indisponível", "caminho", r.URL.Path, "erro", err)
 		httpjson.EscreverErro(w, http.StatusServiceUnavailable, "servico_indisponivel",

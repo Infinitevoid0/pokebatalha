@@ -1,5 +1,4 @@
-// Comando batalha: microsserviço que roda as partidas por turnos.
-// Expõe REST para o jogador e consome catálogo e jogadores via gRPC.
+// microsserviço de batalha: REST para o jogador, gRPC para catálogo e jogadores.
 package main
 
 import (
@@ -70,6 +69,6 @@ func rodar(log *slog.Logger) error {
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	// A batalha não expõe gRPC: ninguém depende dela.
+	// sem servidor gRPC: ninguém chama a batalha.
 	return execucao.Rodar(ctx, log, httpSrv, nil, "")
 }

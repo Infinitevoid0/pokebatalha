@@ -1,10 +1,9 @@
-// Package dominio é o motor da batalha: regras puras, sem banco, HTTP ou
-// gRPC. Tudo aqui é testável com um sorteador previsível.
+// motor da batalha: regras puras, sem banco, HTTP ou gRPC.
 package dominio
 
 import "errors"
 
-// Erros de negócio.
+// erros de negócio.
 var (
 	ErrTimeInvalido         = errors.New("time inválido")
 	ErrAcaoInvalida         = errors.New("ação inválida")
@@ -16,5 +15,5 @@ var (
 	ErrPokemonNaoEncontrado = errors.New("pokémon não encontrado")
 )
 
-// Erro de infraestrutura: catálogo ou jogadores não responderam.
+// erro de infra: catálogo ou jogadores fora do ar.
 var ErrServicoIndisponivel = errors.New("serviço indisponível")

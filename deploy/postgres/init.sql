@@ -1,6 +1,5 @@
--- Roda uma vez, quando o volume do Postgres é criado.
--- Cada microsserviço tem seu próprio banco e seu próprio usuário,
--- e nenhum usuário consegue se conectar ao banco dos outros.
+-- roda só na criação do volume: um banco e um usuário por serviço,
+-- sem acesso ao banco dos outros.
 
 CREATE USER catalogo WITH PASSWORD 'catalogo';
 CREATE DATABASE catalogo_db OWNER catalogo;

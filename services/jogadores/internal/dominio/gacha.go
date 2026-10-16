@@ -1,17 +1,17 @@
 package dominio
 
-// Sorteador permite trocar a aleatoriedade por algo previsível nos testes.
+// permite um sorteio previsível nos testes.
 type Sorteador interface {
 	IntN(n int) int
 }
 
-// ChanceTier é a probabilidade (em %) de um pacote sair em cada tier.
+// chance (%) de cada tier.
 type ChanceTier struct {
 	Tier        string `json:"tier"`
 	Porcentagem int    `json:"porcentagem"`
 }
 
-// Chances do gacha, do mais raro ao mais comum. A soma precisa dar 100.
+// do mais raro ao mais comum; soma 100.
 var Chances = []ChanceTier{
 	{Tier: "lendario", Porcentagem: 2},
 	{Tier: "epico", Porcentagem: 8},
@@ -19,26 +19,26 @@ var Chances = []ChanceTier{
 	{Tier: "comum", Porcentagem: 70},
 }
 
-// Pity: depois de tantos pacotes sem, o próximo é garantido.
+// pity: depois de N pacotes sem, o próximo é garantido.
 const (
 	PityEpico    = 10 // épico ou melhor
 	PityLendario = 50
 )
 
-// Pity guarda há quantos pacotes o jogador não tira cada raridade.
+// há quantos pacotes o jogador não tira cada raridade.
 type Pity struct {
 	SemEpico    int `json:"pacotes_sem_epico"`
 	SemLendario int `json:"pacotes_sem_lendario"`
 }
 
-// InfoPity é o pity como o jogador vê: quanto falta para cada garantia.
+// quanto falta para cada garantia.
 type InfoPity struct {
 	Pity
 	EpicoGarantidoEm    int `json:"epico_garantido_em"`
 	LendarioGarantidoEm int `json:"lendario_garantido_em"`
 }
 
-// Info calcula quantos pacotes faltam para cada garantia.
+// calcula quanto falta para cada garantia.
 func (p Pity) Info() InfoPity {
 	return InfoPity{
 		Pity:                p,
@@ -47,8 +47,7 @@ func (p Pity) Info() InfoPity {
 	}
 }
 
-// SortearTier rola um número de 0 a 99 e vê em qual faixa ele cai.
-// Ex: 0-1 lendário, 2-9 épico, 10-29 raro, 30-99 comum.
+// rola 0 a 99 e vê a faixa (0-1 lendário, 2-9 épico, 10-29 raro, 30-99 comum).
 func SortearTier(s Sorteador) string {
 	n := s.IntN(100)
 	acumulado := 0
@@ -61,16 +60,15 @@ func SortearTier(s Sorteador) string {
 	return "comum"
 }
 
-// ResultadoSorteio é o tier sorteado e como fica o pity depois dele.
+// tier sorteado e o pity depois dele.
 type ResultadoSorteio struct {
 	Tier      string
 	Garantido bool // saiu por causa do pity
 	Pity      Pity
 }
 
-// SortearComPity aplica as garantias antes do sorteio normal.
-// No pity de épico, o resultado é épico ou lendário na mesma proporção das
-// chances normais (2 para 8), para o lendário continuar possível.
+// aplica as garantias antes do sorteio normal.
+// no pity de épico, sai épico ou lendário na proporção normal (8 para 2).
 func SortearComPity(s Sorteador, atual Pity) ResultadoSorteio {
 	proximo := Pity{SemEpico: atual.SemEpico + 1, SemLendario: atual.SemLendario + 1}
 

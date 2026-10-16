@@ -1,17 +1,17 @@
 :root {
-  /* --- Backgrounds --- */
+  /* backgrounds */
   --bg-primary:    #1a1c2c;
   --bg-secondary:  #262b44;
   --bg-surface:    #333c57;
   --bg-dialog:     #f4f4f4;
   --bg-deep:       #0d0f18;
 
-  /* --- Texto --- */
+  /* texto */
   --text-primary:   #f2f2f2;
   --text-secondary: #a0a8c0;
   --text-dialog:    #1a1c2c;
 
-  /* --- Destaques --- */
+  /* destaques */
   --accent-red:    #e43b44;
   --accent-green:  #3e8948;
   --accent-yellow: #feae34;
@@ -19,12 +19,12 @@
   --accent-purple: #b55088;
   --accent-gold:   #f7d51d;
 
-  /* --- HP --- */
+  /* hP */
   --hp-alto:  #63c74d;
   --hp-medio: #feae34;
   --hp-baixo: #e43b44;
 
-  /* --- Tipos Pokémon --- */
+  /* tipos Pokémon */
   --type-normal:   #a8a878;
   --type-fire:     #f08030;
   --type-water:    #6890f0;
@@ -44,17 +44,17 @@
   --type-steel:    #b8b8d0;
   --type-fairy:    #ee99ac;
 
-  /* --- Tiers --- */
+  /* tiers */
   --tier-comum:    #a0a8c0;
   --tier-raro:     #6890f0;
   --tier-epico:    #b55088;
   --tier-lendario: #f7d51d;
 
-  /* --- Fontes --- */
+  /* fontes */
   --font-pixel: 'Press Start 2P', ui-monospace, monospace;
   --font-title: 'Silkscreen', ui-monospace, monospace;
 
-  /* --- Espaçamentos (grade de 4px) --- */
+  /* espaçamentos (grade de 4px) */
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;
@@ -62,7 +62,7 @@
   --sp-6: 24px;
   --sp-8: 32px;
 
-  /* --- Bordas e sombras pixel --- */
+  /* bordas e sombras pixel */
   --border-pixel: 3px solid #f2f2f2;
   --border-dark:  3px solid #1a1c2c;
   --shadow-pixel: 4px 4px 0 var(--bg-deep);

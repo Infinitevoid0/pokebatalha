@@ -1,4 +1,4 @@
-// Package config carrega a configuração do serviço de jogadores.
+// configuração de jogadores via ambiente.
 package config
 
 import (
@@ -7,7 +7,6 @@ import (
 	"pokebatalha/pkg/config"
 )
 
-// Config reúne tudo que o serviço lê do ambiente.
 type Config struct {
 	PortaHTTP        string
 	PortaGRPC        string
@@ -18,13 +17,12 @@ type Config struct {
 	PrecoPacote      int
 }
 
-// Carregar lê as variáveis de ambiente.
 func Carregar() (Config, error) {
 	dbURL, err := config.Obrigatorio("DATABASE_URL")
 	if err != nil {
 		return Config{}, err
 	}
-	// O sorteio de comum pode precisar de várias idas à PokeAPI.
+	// o sorteio de comum pode levar várias idas à PokeAPI.
 	timeout, err := config.Duracao("GRPC_TIMEOUT", 30*time.Second)
 	if err != nil {
 		return Config{}, err

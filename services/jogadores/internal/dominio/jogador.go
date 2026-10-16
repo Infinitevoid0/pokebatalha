@@ -1,4 +1,4 @@
-// Package dominio contém os tipos e regras de jogadores, moedas e gacha.
+// jogadores, moedas e gacha.
 package dominio
 
 import (
@@ -9,7 +9,7 @@ import (
 	"unicode/utf8"
 )
 
-// Erros de negócio.
+// erros de negócio.
 var (
 	ErrNomeInvalido         = errors.New("nome inválido")
 	ErrNomeEmUso            = errors.New("nome já está em uso")
@@ -21,10 +21,10 @@ var (
 	ErrCompraSimultanea     = errors.New("outro pacote está sendo aberto ao mesmo tempo, tente de novo")
 )
 
-// Erro de infraestrutura: outro microsserviço não respondeu.
+// infra: outro microsserviço não respondeu.
 var ErrServicoIndisponivel = errors.New("serviço indisponível")
 
-// Jogador é a conta de quem joga.
+// conta de quem joga.
 type Jogador struct {
 	ID       int64     `json:"id"`
 	Nome     string    `json:"nome"`
@@ -33,7 +33,7 @@ type Jogador struct {
 	CriadoEm time.Time `json:"criado_em"`
 }
 
-// Stats são os atributos base do Pokémon.
+// atributos base.
 type Stats struct {
 	HP             int `json:"hp"`
 	Ataque         int `json:"ataque"`
@@ -43,7 +43,7 @@ type Stats struct {
 	Velocidade     int `json:"velocidade"`
 }
 
-// ComposicaoPoder mostra de onde vem o índice de poder.
+// de onde vem o índice de poder.
 type ComposicaoPoder struct {
 	Total           int    `json:"total"`
 	Stats           int    `json:"stats"`
@@ -53,7 +53,7 @@ type ComposicaoPoder struct {
 	HabilidadeAtiva string `json:"habilidade_ativa,omitempty"`
 }
 
-// Detalhes são os dados atuais do Pokémon, vindos do catálogo.
+// dados atuais do Pokémon (do catálogo).
 type Detalhes struct {
 	Tier  string          `json:"tier"`
 	Tipos []string        `json:"tipos"`
@@ -61,14 +61,14 @@ type Detalhes struct {
 	Stats Stats           `json:"stats"`
 }
 
-// PokemonSorteado é o que o catálogo devolve ao abrir um pacote.
+// o que o catálogo devolve ao abrir um pacote.
 type PokemonSorteado struct {
 	PokemonID int
 	Nome      string
 	Detalhes  Detalhes
 }
 
-// ItemColecao é um Pokémon que o jogador já possui.
+// um Pokémon que o jogador possui.
 type ItemColecao struct {
 	ID          int64     `json:"id"`
 	PokemonID   int       `json:"pokemon_id"`
@@ -84,7 +84,7 @@ const (
 	tamanhoMaximoNome = 20
 )
 
-// NormalizarNome tira espaços das pontas e valida o tamanho.
+// tira espaços das pontas e valida o tamanho.
 func NormalizarNome(nome string) (string, error) {
 	nome = strings.TrimSpace(nome)
 	n := utf8.RuneCountInString(nome)

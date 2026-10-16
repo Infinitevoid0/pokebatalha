@@ -17,7 +17,7 @@ import (
 	"pokebatalha/services/batalha/internal/dominio"
 )
 
-// servidorFalso responde ValidarTime com o código gRPC configurado.
+// responde ValidarTime com o código gRPC configurado.
 type servidorFalso struct {
 	jogadoresv1.UnimplementedJogadoresServer
 	codigo codes.Code
@@ -38,7 +38,7 @@ func (s *servidorFalso) ValidarTime(ctx context.Context, _ *jogadoresv1.ValidarT
 	return &jogadoresv1.ValidarTimeResponse{}, nil
 }
 
-// novoCliente sobe um servidor gRPC em memória (sem rede) e conecta nele.
+// servidor gRPC em memória (bufconn), sem rede.
 func novoCliente(t *testing.T, srv *servidorFalso, timeout time.Duration) *Jogadores {
 	t.Helper()
 	lis := bufconn.Listen(1 << 20)

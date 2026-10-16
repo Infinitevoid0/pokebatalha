@@ -1,5 +1,4 @@
-// Barra do time: um ícone por Pokémon (ativo destacado, desmaiado apagado).
-// No rival, mostra também nome, tier e poder de todos, não só do ativo.
+// um ícone por Pokémon do time; no rival, mostra também nome, tier e poder.
 import { exibir, escapar } from '../utils.js';
 import { imgPokemon } from '../sprites.js';
 

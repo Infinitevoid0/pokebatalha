@@ -1,4 +1,4 @@
-// Roteador por hash: #login, #menu, #gacha, #colecao, #time, #batalha.
+// roteador por hash: #login, #menu, #gacha, #colecao, #time, #batalha.
 import { Estado } from './state.js';
 
 const telas = {};

@@ -6,7 +6,7 @@ import { mostrarErro } from '../components/dialog-box.js';
 
 export const PRECO_PACOTE = 30;
 
-// Barra com nome, moedas e pity — usada no menu e no gacha.
+// barra com nome, moedas e pity (menu e gacha).
 export function barraJogador() {
   const el = document.createElement('div');
   el.className = 'barra-jogador janela';
@@ -75,7 +75,7 @@ export async function renderMenu(app) {
     navegar(destino);
   });
 
-  // Moedas sempre frescas ao voltar ao menu.
+  // atualiza as moedas ao voltar ao menu.
   API.buscarJogador(Estado.jogador.id)
     .then((j) => Estado.setJogador(j))
     .catch(mostrarErro);

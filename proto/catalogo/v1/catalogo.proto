@@ -4,22 +4,18 @@ package catalogo.v1;
 
 option go_package = "pokebatalha/gen/catalogo/v1;catalogov1";
 
-// Catalogo é o serviço dono dos dados de Pokémon (vindos da PokeAPI)
-// e do índice de poder que define o tier de cada um.
+// dono dos dados de Pokémon (da PokeAPI) e do índice de poder que define o tier.
 service Catalogo {
-  // BuscarPokemon devolve um Pokémon pelo ID da PokeAPI.
-  // Erros: NOT_FOUND (não existe), INVALID_ARGUMENT, UNAVAILABLE (PokeAPI fora).
+  // busca um Pokémon pelo ID. erros: NOT_FOUND, INVALID_ARGUMENT, UNAVAILABLE.
   rpc BuscarPokemon(BuscarPokemonRequest) returns (Pokemon);
 
-  // BuscarPokemons devolve vários Pokémon de uma vez (até 50).
+  // busca até 50 Pokémon de uma vez.
   rpc BuscarPokemons(BuscarPokemonsRequest) returns (BuscarPokemonsResponse);
 
-  // SortearPokemon devolve um Pokémon aleatório do tier pedido. Com
-  // poder_referencia > 0, sorteia entre os de poder mais próximo.
-  // Erros: INVALID_ARGUMENT, UNAVAILABLE (PokeAPI fora ou cache ainda carregando).
+  // sorteia um Pokémon do tier; com poder_referencia > 0, o de poder mais próximo.
   rpc SortearPokemon(SortearPokemonRequest) returns (Pokemon);
 
-  // TabelaDeTipos devolve as relações de dano entre os 18 tipos.
+  // relações de dano entre os 18 tipos.
   rpc TabelaDeTipos(TabelaDeTiposRequest) returns (TabelaDeTiposResponse);
 }
 
@@ -36,7 +32,7 @@ message BuscarPokemonsResponse {
 }
 
 message SortearPokemonRequest {
-  // "comum", "raro", "epico" ou "lendario".
+  // comum, raro, epico ou lendario.
   string tier = 1;
   int32 poder_referencia = 2;
 }
@@ -50,7 +46,7 @@ message Status {
   int32 velocidade = 6;
 }
 
-// Poder é o índice de força, com a conta aberta.
+// índice de força com a conta aberta.
 message Poder {
   int32 total = 1;
   int32 stats = 2;

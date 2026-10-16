@@ -10,7 +10,7 @@ import (
 	"pokebatalha/services/jogadores/internal/dominio"
 )
 
-// repoMemoria guarda tudo em mapas, só para os testes.
+// tudo em mapas, só para os testes.
 type repoMemoria struct {
 	jogadores map[int64]*dominio.Jogador
 	colecao   map[int64][]dominio.ItemColecao
@@ -77,7 +77,7 @@ func (r *repoMemoria) PokemonsFaltando(_ context.Context, id int64, ids []int) (
 	return faltando, nil
 }
 
-// catalogoFalso registra o tier pedido e devolve um Pokémon fixo.
+// registra o tier pedido e devolve um Pokémon fixo.
 type catalogoFalso struct {
 	erro       error
 	tierPedido string

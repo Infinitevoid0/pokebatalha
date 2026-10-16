@@ -1,4 +1,4 @@
-# Requer protoc, protoc-gen-go e protoc-gen-go-grpc no PATH.
+# requer protoc, protoc-gen-go e protoc-gen-go-grpc no PATH:
 #   go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.34.2
 #   go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
 
@@ -22,6 +22,6 @@ down:
 jogar:
 	go run ./cmd/jogar
 
-# Front sem Docker: serve web/ e faz o proxy de /api para as portas 8081-8083.
+# front sem Docker (proxy de /api para as portas 8081-8083).
 web:
 	node web/dev-server.mjs
